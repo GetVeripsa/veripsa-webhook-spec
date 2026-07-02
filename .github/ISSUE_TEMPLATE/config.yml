@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Veripsa support
+    url: https://veripsa.com
+    about: For account, billing, or installation questions, please reach out via veripsa.com — this repo is for the public webhook spec only.
+  - name: Veripsa changelog
+    url: https://github.com/GetVeripsa/veripsa-changelog
+    about: User-visible changes to the Veripsa Core engine are listed in the changelog repo. If you noticed a behaviour change in your repo that isn't on this spec, please check the changelog first.
