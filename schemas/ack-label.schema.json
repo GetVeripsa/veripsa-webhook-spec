@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/GetVeripsa/veripsa-webhook-spec/schemas/ack-label.schema.json",
+  "title": "Veripsa ack label contract",
+  "description": "Stable public semantics of the single label Veripsa reacts to.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "name",
+    "meaning",
+    "appliedBy",
+    "effectWhenPaused",
+    "staleWhenMaterialCouplingChanges"
+  ],
+  "properties": {
+    "name": {
+      "const": "veripsa-ack"
+    },
+    "meaning": {
+      "const": "seen_and_proceeding"
+    },
+    "appliedBy": {
+      "const": "human_or_agent"
+    },
+    "effectWhenPaused": {
+      "const": "action_required_to_neutral"
+    },
+    "staleWhenMaterialCouplingChanges": {
+      "const": true
+    }
+  }
+}

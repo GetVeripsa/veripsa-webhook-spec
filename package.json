@@ -1,0 +1,47 @@
+{
+  "name": "@veripsa/webhook-spec",
+  "version": "0.0.0",
+  "description": "Public integration contract, JSON Schemas, examples, and TypeScript declarations for the Veripsa GitHub App surface.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GetVeripsa/veripsa-webhook-spec.git"
+  },
+  "bugs": {
+    "url": "https://github.com/GetVeripsa/veripsa-webhook-spec/issues"
+  },
+  "homepage": "https://veripsa.com/docs",
+  "keywords": [
+    "veripsa",
+    "github-app",
+    "github-checks",
+    "webhooks",
+    "ai-agents",
+    "pull-requests",
+    "json-schema",
+    "typescript"
+  ],
+  "files": [
+    "README.md",
+    "EVENTS.md",
+    "OUTPUT.md",
+    "ACK_LABEL.md",
+    "schemas/",
+    "examples/",
+    "types/",
+    "docs/"
+  ],
+  "exports": {
+    "./schemas/check-run-signal": "./schemas/check-run-signal.schema.json",
+    "./schemas/pr-comment-surface": "./schemas/pr-comment-surface.schema.json",
+    "./schemas/webhook-routing-event": "./schemas/webhook-routing-event.schema.json",
+    "./schemas/ack-label": "./schemas/ack-label.schema.json",
+    "./types": "./types/index.d.ts"
+  },
+  "types": "./types/index.d.ts",
+  "scripts": {
+    "check:json": "node scripts/check-json.mjs"
+  }
+}

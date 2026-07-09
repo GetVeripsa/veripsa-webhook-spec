@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/GetVeripsa/veripsa-webhook-spec/schemas/pr-comment-surface.schema.json",
+  "title": "Veripsa PR comment surface",
+  "description": "Stable public markers and content-free refs in the single Veripsa PR comment.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "marker",
+    "leadingVerdict"
+  ],
+  "properties": {
+    "marker": {
+      "type": "string",
+      "pattern": "^<!-- veripsa:PR-[1-9][0-9]* -->$"
+    },
+    "ackSnapshotMarker": {
+      "type": "string",
+      "pattern": "^<!-- veripsa-ack-snap:[0-9a-f]+ -->$"
+    },
+    "leadingVerdict": {
+      "type": "string",
+      "enum": [
+        "Clear to land.",
+        "Wait in line.",
+        "Heads up.",
+        "Heads up — minor overlap.",
+        "Unknown.",
+        "Acknowledged."
+      ]
+    },
+    "partnerRefs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^PR-[1-9][0-9]*$"
+      },
+      "uniqueItems": true
+    },
+    "branchRefs": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^BR-[A-Za-z0-9._-]+$"
+      },
+      "uniqueItems": true
+    },
+    "paths": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "uniqueItems": true
+    }
+  }
+}
