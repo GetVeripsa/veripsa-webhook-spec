@@ -1,11 +1,8 @@
 # veripsa-webhook-spec
 
-The public integration contract for the **Veripsa GitHub App** — the
-advisory, content-free GitHub App that flags pre-merge structural overlap
-across in-flight PRs for teams running parallel AI coding agents.
+The public integration contract for the **Veripsa GitHub App** — the advisory, content-free GitHub App that helps teams notice risky PR landing order before `main` changes.
 
-This repository is the open-source surface that external tools can build
-against. It defines:
+This repository is the open-source surface that external tools can build against. It defines:
 
 - which **GitHub webhook events** the App subscribes to,
 - the shape of **what it posts back** — check runs and PR comments,
@@ -15,10 +12,24 @@ against. It defines:
 
 Veripsa lives at [veripsa.com](https://veripsa.com). The App itself is
 installed from a free on-ramp; this repo is published separately so
-integrators can treat the surface as a stable contract.
+integrators can treat the public output surface as a stable contract.
 
 > This is the **integration contract**. It is **not** documentation of how
-> the engine decides anything. Engine internals stay private.
+> Veripsa decides anything internally.
+
+## Best links for readers
+
+| Need | Link |
+| --- | --- |
+| Product overview | <https://veripsa.com/how-it-works> |
+| Agent usage guide | <https://veripsa.com/docs/with-agents> |
+| Share / quote Veripsa safely | <https://veripsa.com/share> |
+| 日本語の共有キット | <https://veripsa.com/ja/share> |
+| Changelog | <https://github.com/GetVeripsa/veripsa-changelog> |
+| Roadmap | <https://github.com/GetVeripsa/veripsa-roadmap> |
+| Blog RSS | <https://veripsa.com/blog/feed.xml> |
+| Blog JSON Feed | <https://veripsa.com/blog/feed.json> |
+| LLM discovery file | <https://veripsa.com/llms.txt> |
 
 ## Who this is for
 
@@ -28,9 +39,8 @@ integrators can treat the surface as a stable contract.
   comment / label** and react to it correctly.
 - Security and compliance reviewers who want to know exactly which GitHub
   permissions and events the App uses.
-- Maintainers who want a small, content-free fixture for testing how an
-  autonomous agent should pause, acknowledge, or continue around PR
-  collisions.
+- Maintainers who want a small fixture for testing how an autonomous agent
+  should pause, acknowledge, or continue around PR warnings.
 
 ## What this is NOT
 
@@ -44,15 +54,14 @@ integrators can treat the surface as a stable contract.
 
 ## Honest scope
 
-- Veripsa is **content-free**: it never stores or displays customer source
-  file bodies. Only paths, symbol names, line ranges, structural
-  relationships, and GitHub identifiers are reflected in the public
-  contract.
-- Veripsa runs **same-owner per-repo**. Other scopes are not a claim made
+- Veripsa is **content-free by design**: it does not store or display customer
+  source file bodies. This repo documents the public output contract, not a
+  code-review surface.
+- Veripsa runs **same-owner per-repo** today. Other scopes are not a claim made
   by this spec.
-- Veripsa is **not a merge queue** and **not an AI reviewer**. It records
-  who-is-changing-what across in-flight PRs and surfaces structural
-  overlap before merge.
+- Veripsa is **not a merge queue** and **not an AI reviewer**. It gives teams a
+  GitHub-native warning before a risky landing order turns into a `main`
+  problem.
 
 ## Repository map
 
@@ -105,7 +114,7 @@ Integrators may rely on:
 - the JSON Schema file paths in `schemas/`.
 
 Integrators should not rely on full human-facing sentence copy, comment
-paragraph order, badge text, or internal scoring details.
+paragraph order, badge text, or private scoring details.
 
 ## Status
 
