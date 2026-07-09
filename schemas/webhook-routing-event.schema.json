@@ -1,0 +1,241 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/GetVeripsa/veripsa-webhook-spec/schemas/webhook-routing-event.schema.json",
+  "title": "Veripsa webhook routing event",
+  "description": "Abridged GitHub webhook fields that matter at the public Veripsa routing-contract level.",
+  "oneOf": [
+    {
+      "title": "pull_request",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "action",
+        "number",
+        "pull_request",
+        "repository",
+        "installation"
+      ],
+      "properties": {
+        "action": {
+          "type": "string"
+        },
+        "number": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "pull_request": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "number",
+            "head",
+            "base",
+            "draft"
+          ],
+          "properties": {
+            "number": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "head": {
+              "type": "object",
+              "additionalProperties": true,
+              "required": [
+                "sha",
+                "ref"
+              ],
+              "properties": {
+                "sha": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{40}$"
+                },
+                "ref": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "base": {
+              "type": "object",
+              "additionalProperties": true,
+              "required": [
+                "ref"
+              ],
+              "properties": {
+                "ref": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "draft": {
+              "type": "boolean"
+            },
+            "labels": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "additionalProperties": true,
+                "required": [
+                  "name"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "repository": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "full_name"
+          ],
+          "properties": {
+            "full_name": {
+              "type": "string",
+              "pattern": "^[^/\\s]+/[^/\\s]+$"
+            }
+          }
+        },
+        "installation": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "id"
+          ],
+          "properties": {
+            "id": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      }
+    },
+    {
+      "title": "push",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "ref",
+        "before",
+        "after",
+        "repository",
+        "installation"
+      ],
+      "properties": {
+        "ref": {
+          "type": "string",
+          "pattern": "^refs/heads/.+"
+        },
+        "before": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "after": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "repository": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "full_name"
+          ],
+          "properties": {
+            "full_name": {
+              "type": "string",
+              "pattern": "^[^/\\s]+/[^/\\s]+$"
+            }
+          }
+        },
+        "installation": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "id"
+          ],
+          "properties": {
+            "id": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        }
+      }
+    },
+    {
+      "title": "installation_or_installation_repositories",
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "action",
+        "installation"
+      ],
+      "properties": {
+        "action": {
+          "type": "string"
+        },
+        "installation": {
+          "type": "object",
+          "additionalProperties": true,
+          "required": [
+            "id"
+          ],
+          "properties": {
+            "id": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "account": {
+              "type": "object",
+              "additionalProperties": true,
+              "properties": {
+                "login": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "User",
+                    "Organization"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "repositories_added": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "full_name": {
+                "type": "string",
+                "pattern": "^[^/\\s]+/[^/\\s]+$"
+              }
+            }
+          }
+        },
+        "repositories_removed": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "full_name": {
+                "type": "string",
+                "pattern": "^[^/\\s]+/[^/\\s]+$"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
