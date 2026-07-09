@@ -23,5 +23,6 @@ SOFTWARE.
 ---
 
 Note: this license applies to the contents of this webhook-spec repository
-only (the README and per-surface documentation files). The Veripsa Core
-engine itself is not open-source and is not distributed under this license.
+only: the README, per-surface documentation files, JSON Schemas, examples,
+TypeScript declarations, and supporting metadata. The Veripsa Core engine
+itself is not open-source and is not distributed under this license.
