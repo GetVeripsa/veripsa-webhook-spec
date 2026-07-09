@@ -1,0 +1,29 @@
+{
+  "action": "opened",
+  "number": 42,
+  "pull_request": {
+    "number": 42,
+    "head": {
+      "sha": "0123456789abcdef0123456789abcdef01234567",
+      "ref": "agent/pricing-a"
+    },
+    "base": {
+      "ref": "main"
+    },
+    "draft": false,
+    "labels": [
+      {
+        "name": "veripsa-ack"
+      }
+    ]
+  },
+  "repository": {
+    "full_name": "example/repo"
+  },
+  "installation": {
+    "id": 12345678
+  },
+  "sender": {
+    "login": "agent-a"
+  }
+}
