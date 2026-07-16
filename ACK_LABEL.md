@@ -1,9 +1,9 @@
 # The `veripsa-ack` label
 
-`veripsa-ack` is the single PR label Veripsa reacts to. Its purpose is
-to give authors and agents an **explicit, recorded acknowledgement** of
-a structural coupling that Veripsa has surfaced — without Veripsa ever
-blocking a merge by itself.
+`veripsa-ack` is the single PR label Veripsa reacts to. It is an **optional,
+explicit, recorded acknowledgement** of a structural coupling that Veripsa
+has surfaced. Installing or using Veripsa does not require a routine ACK step,
+per-agent setup, CLI polling command, or copied merge rule.
 
 ## What "ack" means
 
@@ -21,16 +21,16 @@ It does **not** mean:
 ## When the label matters
 
 The label is meaningful only on PRs where Veripsa has surfaced a
-**material coupling** and paused the check (see
-[`OUTPUT.md`](./OUTPUT.md)). Pause-and-acknowledge is the default
-behaviour on every installation — it is not a plan feature or an
-opt-in.
+**material coupling** in its high-salience check state (see
+[`OUTPUT.md`](./OUTPUT.md)). The state appears automatically; recording an ACK
+is optional unless the repository owner independently makes the Veripsa check
+required and chooses ACK as its exception path.
 
 - On a **Clear** PR, the label has no effect.
 - On a **Heads up** PR with no named in-flight partner (a solo notice),
   or a minor build/list-file overlap, the label has no effect — those
   never pause.
-- On a **paused** PR — a **Wait in line** verdict, or a **Heads up**
+- On a material PR — a **Wait in line** verdict, or a **Heads up**
   verdict with a named in-flight partner PR — the label toggles the
   check's `conclusion` from `action_required` to `neutral` and
   re-renders the comment to record the ack.
@@ -58,7 +58,7 @@ which files). If the coupling **materially changes** between events — a
 different partner PR, a different set of colliding files — the prior
 ack is considered **stale**:
 
-- the pause re-raises on the next analysis,
+- the high-salience state re-raises on the next analysis,
 - the `veripsa-ack` label is slated for removal so the PR visibly reads
   un-acked again.
 

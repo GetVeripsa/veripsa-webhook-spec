@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/GetVeripsa/veripsa-webhook-spec/schemas/pr-comment-surface.schema.json",
-  "title": "Veripsa PR comment surface",
-  "description": "Stable public markers and content-free refs in the single Veripsa PR comment.",
+  "title": "Veripsa normalized coordination-comment surface",
+  "description": "Normalized verdict prefix, stable markers, and content-free refs for a verdict-bearing coordination comment. This is not the raw Markdown body and does not model every operational comment.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -16,10 +16,11 @@
     },
     "ackSnapshotMarker": {
       "type": "string",
-      "pattern": "^<!-- veripsa-ack-snap:[0-9a-f]+ -->$"
+      "pattern": "^<!-- veripsa-ack-snap:[0-9a-f]{12} -->$"
     },
     "leadingVerdict": {
       "type": "string",
+      "description": "Legacy normalized value derived from the evolving bold human lead; do not match the full Markdown sentence.",
       "enum": [
         "Clear to land.",
         "Wait in line.",

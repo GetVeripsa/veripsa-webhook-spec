@@ -16,13 +16,18 @@ noted):
 
 | Permission       | Level | Why                                                 |
 |------------------|-------|-----------------------------------------------------|
-| `contents`       | read  | Read repository structure (paths, refs, blob SHAs). |
+| `contents`       | read  | Read repository structure and file text transiently to derive the documented content-free metadata. |
+| `merge_queues`   | read  | Keep merge-group state consistent with merge queues. |
 | `pull_requests`  | write | Post advisory comments and manage the ack label.    |
 | `checks`         | write | Post advisory check runs on PR head commits.        |
 | `metadata`       | read  | Standard GitHub App requirement.                    |
 
 Veripsa never requests `contents: write`. It does not push commits, open
 PRs, or change branch protection.
+
+GitHub exposes PR conversations and labels through issue-backed APIs. Veripsa
+uses them only for the PR's own managed comment and `veripsa-ack` label; it
+does not request the `issues` permission or subscribe to Issue events.
 
 ## Subscribed events
 
@@ -32,7 +37,7 @@ The primary event. Veripsa reads PR-level structure (head SHA, base ref,
 changed files) to maintain its pre-merge view of in-flight work.
 
 Triggers analysis on: `opened`, `synchronize`, `reopened`,
-`ready_for_review`, `edited` (when the base ref retargets),
+`ready_for_review`, `converted_to_draft`, `edited` (when the base ref retargets),
 `labeled` / `unlabeled` (only when the changed label is `veripsa-ack` —
 see [`ACK_LABEL.md`](./ACK_LABEL.md)), and on transitions that retire a
 PR from the in-flight set (`closed`, `merged`).
@@ -52,7 +57,8 @@ consistent.
 
 Used so Veripsa can observe whether other checks on a PR have completed.
 The App posts its **own** check runs on PR head commits (see
-[`OUTPUT.md`](./OUTPUT.md)).
+[`OUTPUT.md`](./OUTPUT.md)); its own requested suite can also trigger recovery
+of a missing check for a fresh PR head.
 
 ### `merge_group`
 
@@ -61,7 +67,12 @@ GitHub's merge queue feature. Veripsa is **not** a merge queue itself;
 this subscription exists only to keep the in-flight view honest when one
 is in use.
 
+## Automatic App lifecycle deliveries
+
 ### `installation` and `installation_repositories`
+
+GitHub sends these App lifecycle deliveries automatically; they are not extra
+Issue or organization-event subscriptions.
 
 Lifecycle events for the App itself. Veripsa uses these to:
 
@@ -73,9 +84,8 @@ Lifecycle events for the App itself. Veripsa uses these to:
 ## What Veripsa does **not** subscribe to
 
 Among the events Veripsa explicitly does not request: `issues`,
-`issue_comment` (except where carried implicitly by the PR APIs),
-`release`, `workflow_run`, `repository_dispatch`, organization-level
-events, and anything that would imply reading file bodies.
+`issue_comment`, `sub_issues`, `release`, `workflow_run`, `deployment`,
+`deployment_status`, `repository_dispatch`, and organization-level events.
 
 ## Payload-shape examples
 
@@ -133,18 +143,27 @@ identifies the GitHub App installation that received the event.
 }
 ```
 
-These examples are abridged — GitHub adds many more fields to each
-payload. Veripsa ignores anything not listed here at the routing layer.
+These examples are abridged — GitHub adds many more fields to each payload.
+They are not a sanitizer allow-list: Veripsa retains only the minimized
+routing, lifecycle, structural, and output metadata documented in
+[`DATA_HANDLING.md`](./DATA_HANDLING.md).
 
-## Language coverage
+## Language and framework coverage
 
-Coverage varies by repository shape. Files Veripsa understands in depth
-participate in richer collision detection; files outside that envelope are
-still tracked so that direct same-file collisions are always caught, and
-Veripsa returns an honest `Unknown` rather than a false "clear" when it
-cannot see enough. The coverage envelope is described at a high level on
-[veripsa.com/docs](https://veripsa.com/docs); implementation conditions are
-not published.
+Coverage varies by repository shape. This public matrix describes capability
+levels, not private analysis or scoring mechanics.
+
+| Coverage tier | Surfaces |
+| --- | --- |
+| Rich structural | Python, JavaScript/JSX, TypeScript/TSX, Go, Java, Ruby, PHP, C#, Rust, C/C++, Kotlin, Swift, Dart, Elixir, and HTML |
+| Component structural | Astro, Vue, and Svelte |
+| Stylesheet structural | CSS, SCSS/Sass, Less, and Stylus |
+| File-level fallback | Other changed paths remain eligible for direct same-file collision detection. |
+
+Framework and stylesheet tiers can contribute content-free structural records
+to the repository graph. This describes coverage, not private relationship,
+ranking, or verdict mechanics. When coverage is insufficient, Veripsa returns
+`Unknown` rather than a false `Clear`.
 
 If there is a language you need covered, [open a feature
 request](./.github/ISSUE_TEMPLATE/).

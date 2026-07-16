@@ -184,7 +184,8 @@
           "type": "object",
           "additionalProperties": true,
           "required": [
-            "id"
+            "id",
+            "account"
           ],
           "properties": {
             "id": {
@@ -194,6 +195,10 @@
             "account": {
               "type": "object",
               "additionalProperties": true,
+              "required": [
+                "login",
+                "type"
+              ],
               "properties": {
                 "login": {
                   "type": "string"
