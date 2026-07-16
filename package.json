@@ -25,13 +25,13 @@
   ],
   "files": [
     "README.md",
+    "DATA_HANDLING.md",
     "EVENTS.md",
     "OUTPUT.md",
     "ACK_LABEL.md",
     "schemas/",
     "examples/",
-    "types/",
-    "docs/"
+    "types/"
   ],
   "exports": {
     "./schemas/check-run-signal": "./schemas/check-run-signal.schema.json",

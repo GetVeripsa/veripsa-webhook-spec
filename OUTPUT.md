@@ -1,14 +1,13 @@
 # What Veripsa posts back
 
-For every analyzed PR, Veripsa upserts two things on GitHub:
+For every analyzed PR, Veripsa upserts one **check run** on the PR's head
+commit, carrying the verdict and a GitHub `conclusion`. When there is
+coordination context worth explaining, it may also upsert one managed **PR
+comment** with a stable HTML marker. A PR that stays clear from its first
+analysis may remain check-only.
 
-1. one **check run** on the PR's head commit, carrying the verdict and a
-   GitHub `conclusion`;
-2. one **PR comment** carrying the human-readable explanation plus a
-   stable HTML marker integrators can use to find it.
-
-Both are upserted in place — re-analysis of the same head commit updates
-the existing check / comment rather than creating a new one.
+Both surfaces are updated in place when present; re-analysis does not append
+duplicate checks or managed comments.
 
 > Veripsa does not block merges by itself. Whether a Veripsa check is
 > required to merge is entirely controlled by your repository's
@@ -16,12 +15,13 @@ the existing check / comment rather than creating a new one.
 
 ## The verdict ladder
 
-Veripsa surfaces one of five verdicts on the check run. The exact title
+Veripsa surfaces one of four verdicts on the check run. The exact title
 copy after the em-dash may evolve; the **shape** of the ladder is stable
 and is what integrators should branch on (via the check title prefix,
 not full-string match).
 
-The table below is the ladder in its **advisory form**. For a
+The table below is the ladder in its **advisory form**. A minor Heads up is a
+variant of Heads up, not a fifth verdict. For a
 **material** in-flight collision — a **Wait in line** verdict, or a
 **Heads up** verdict with a named in-flight partner PR — the check is
 normally posted in the pause-and-acknowledge shape instead
@@ -51,9 +51,29 @@ Integrators should branch on the prefix tokens up to (but not including)
 the second em-dash; treat both `Clear` and `Clear to land` as the
 **Clear** verdict.
 
+### Normalized check signal
+
+The package schema/type named `VeripsaCheckRunSignal` is a documented
+**normalized view**, not GitHub's raw check-run payload. Map
+`check_run.name` to `name`, `check_run.output.title` to `title`, and
+`check_run.conclusion` to `conclusion`. Normalize the title to `token` as
+follows:
+
+- For verdict titles beginning `Veripsa — `, take the stable prefix described
+  above and normalize only its first letter to title case.
+- Map `Veripsa is now watching` to `Watching` and
+  `Veripsa paused — early-access limit reached` to
+  `Early-access limit reached`.
+- Map the documented changed-files, branch-verification, heading,
+  acknowledgement-verification, and merge-queue titles to their correspondingly
+  named enum value; dynamic branch text is not part of the `Heading to` token.
+- Treat an unknown future title as an unsupported token; branch on the GitHub
+  `conclusion` and display the full title rather than guessing a verdict.
+
 ## When the `conclusion` changes
 
-- **`success`** is posted only for the **Clear** verdict.
+- **`success`** is posted for a **Clear** PR verdict and the
+  **Merge queue: clear** operational state.
 - **`neutral`** is posted for the advisory verdicts, for the
   **Acknowledged** pause state, and for the informational states below.
 - **`action_required`** is posted in exactly two situations: a material
@@ -64,30 +84,44 @@ the second em-dash; treat both `Clear` and `Clear to land` as the
 A `neutral` check is, by GitHub's definition, a check that has completed
 and does not gate a merge. An `action_required` check gates the merge
 only if your branch-protection policy marks the Veripsa check as
-required. The signal you act on lives in the **check title** and the
-**PR comment** Veripsa posts in parallel.
+required. The signal you act on lives in the **check title** and, when present,
+the managed **PR comment**.
 
 ## Informational (non-verdict) check states
 
-Veripsa also posts `neutral` checks for a few operational states that
-are not themselves a verdict:
+Veripsa also posts checks for operational states that are not themselves a PR
+coordination verdict. Normalize their observable titles to the tokens below:
 
 - **"Veripsa is now watching"** — posted on first install / first
-  analysis of a PR before a verdict is available.
-- **"Veripsa paused — free tier reached"** — posted when the
+  repository ingest before a PR verdict is available. Token: `Watching`.
+- **"Veripsa paused — early-access limit reached"** — posted when the
   installation is beyond its plan's coverage and Veripsa is not
   analyzing further. This is a visible state, not a silent miss; it is
-  `neutral`, never `failure`.
+  `neutral`, never `failure`. Token: `Early-access limit reached`.
 - **"Veripsa — changed files not read, not analyzed"** — posted when
   Veripsa could not read the PR's changed-files list for that event.
   Veripsa does not silently fall back to "Clear" in this case; it
-  surfaces that it did not analyze.
+  surfaces that it did not analyze. Token: `Changed files not read`.
+- **"Veripsa — branch state not verified, retrying"** — posted when live
+  branch state could not be verified safely. Token: `Branch state not verified`.
+- **"Veripsa — acknowledgement verification pending"** — preserves an
+  existing ACK without silently rebinding it while branch state is unavailable.
+  Token: `Acknowledgement verification pending`.
+- **"Veripsa — heading to <branch>"** — no in-flight reservation is recorded
+  for that PR yet. Token: `Heading to`; the branch is dynamic display text.
+- **"Veripsa — merge queue: clear"**, **"review overlap"**, or **"not
+  analyzed"** — the observable merge-group states. Tokens: `Merge queue:
+  clear`, `Merge queue: review overlap`, and `Merge queue: not analyzed`.
+
+All of these operational states are `neutral` except `Merge queue: clear`,
+which is `success`.
 
 ## Unresolved merge conflict markers
 
-If the PR's diff adds a paired set of literal git merge conflict markers
-(`<<<<<<<` together with `>>>>>>>`) inside one or more changed files,
-Veripsa's single check run for that head commit hard-fails:
+If the PR's diff adds a paired set of literal git merge conflict marker shapes
+(`<<<<<<<` together with `>>>>>>>`) at the start of added lines in one or more
+changed files, Veripsa treats it as a likely unresolved conflict and posts a
+high-salience result:
 
 | Check title                                          | GitHub `conclusion` |
 |-------------------------------------------------------|---------------------|
@@ -96,25 +130,27 @@ Veripsa's single check run for that head commit hard-fails:
 There is **no separate second check**: the one-check-per-head-commit
 contract (see [Check-run idempotency](#check-run-idempotency)) still
 holds. The same check run's conclusion, title, and summary are replaced
-with the hard-fail lead; any coupling verdict for the same PR remains
+with the high-salience lead; any coupling verdict for the same PR remains
 visible in the PR comment body, below the conflict-marker block.
 
-This and the pause-and-acknowledge state (next section) are the only
-two situations in which Veripsa emits `action_required`. The signal is
-content-free: only the path and the first marker line number are
-reported; no file body is read or posted. It is a hard-fail because an
-unresolved marker will break the build regardless of any coupling
-verdict.
+This and the pause-and-acknowledge state (next section) are the only two
+situations in which Veripsa emits `action_required`. The detector inspects the
+diff transiently, but only the path and marker line number cross the retained or
+posted boundary; file and diff bodies are not retained or posted. A literal
+pair can also appear intentionally (for example, in documentation), so the
+result asks for inspection rather than asserting that the change is wrong.
 
 ## 一時停止 (pause-and-acknowledge)
 
-Pause-and-acknowledge is Veripsa's **default behaviour on every
-installation**. It is not a plan feature and there is no opt-in or
-opt-out switch. When a verdict names a **material** in-flight collision
-— **Wait in line**, or **Heads up** with a named in-flight partner PR —
+Normal Veripsa use requires no acknowledgement step, agent command, copied
+merge rule, or extra per-agent setup. When a verdict names a **material**
+in-flight collision — **Wait in line**, or **Heads up** with a named in-flight partner PR —
 Veripsa posts the check with `conclusion: action_required` until the PR
-carries the `veripsa-ack` label. The label is the explicit
-acknowledgement signal; see [`ACK_LABEL.md`](./ACK_LABEL.md).
+carries a matching `veripsa-ack` label or the coupling changes. This is a
+high-salience GitHub-native signal, not a workflow Veripsa forces: when the
+check is not required by repository policy, the PR can still merge without
+adding the label. Teams that want an auditable exception can optionally use
+the label; see [`ACK_LABEL.md`](./ACK_LABEL.md).
 
 The check title reshapes around the ack state:
 
@@ -140,17 +176,19 @@ If the pause state cannot be computed for an event (for example, a
 transient GitHub API error), Veripsa fails open: the advisory `neutral`
 form of the verdict is posted unchanged, never a spurious pause.
 
-The `action_required` conclusion signals "the author has not yet
-acknowledged this specific collision"; it is **not** Veripsa asserting
-that the change is wrong. Whether `action_required` actually blocks the
-merge is decided by your branch-protection policy (the Veripsa check
-must be marked required for `action_required` to gate the merge).
+The `action_required` conclusion signals that a specific collision deserves
+attention and has no matching optional acknowledgement. It is **not** Veripsa
+asserting that the change is wrong or imposing an ACK ceremony. Whether it
+actually blocks the merge is decided by your branch-protection policy (the
+Veripsa check must be marked required for `action_required` to gate the merge).
 
 ## The PR comment
 
-Alongside the check run, Veripsa upserts a single PR comment that
-carries the human-readable explanation of the verdict plus structured
-pointers an agent can react to.
+When a verdict needs explanation, Veripsa upserts a managed PR comment with
+human-readable context and structured pointers an agent can react to. Clear
+or no-reservation results may be check-only. The normalized
+`VeripsaPrCommentSurface` schema covers verdict-bearing coordination comments;
+operational comments remain human-facing unless separately documented.
 
 ### The comment marker
 
@@ -176,25 +214,26 @@ The marker is:
 
 ### Comment idempotency
 
-Veripsa posts **exactly one** marked comment per PR.
+When a PR needs a comment, Veripsa keeps **at most one** marked comment per PR.
 
-- The first analysis of a PR creates the comment with the marker
-  prepended.
-- Every subsequent analysis on the same PR **edits the existing comment
-  in place** — same marker, replaced body. Veripsa does not append new
-  comments on re-analysis.
+- The first analysis that needs a comment creates it with the marker prepended.
+- Subsequent comment-bearing analyses **edit the existing comment in place**
+  — same marker, replaced body.
 - The marker is preserved on edit; the rest of the body may change
   freely between events.
+- A PR that stays clear from the start may have no Veripsa PR comment.
 
 ### Where structured info lives in the body
 
 The comment body is GitHub-flavored markdown intended for humans. A few
 conventions agents can rely on:
 
-- The comment **opens** with a bold human header that matches the check
-  title (e.g. `**Clear to land.**`, `**Wait in line.**`, `**Heads up —
-  minor overlap.**`). Branch on the leading bold token, not on the full
-  sentence. On a **paused** PR the bold header still carries the
+- After its `### Veripsa — heading to ...` heading, a coordination comment has
+  a bold human lead whose verdict prefix matches the check (for example,
+  `Clear`, `Clear to land`, `Wait in line`, `Heads up`, or `Unknown`). Full
+  sentence copy and icons may evolve; normalize the prefix to the legacy
+  `leadingVerdict` values in the schema rather than matching the entire line.
+  On a **paused** PR the bold lead still carries the
   underlying verdict (e.g. **Wait in line**) with the pause instruction
   quoted directly beneath it; on an **acknowledged** PR the header is
   rewritten to the acknowledged state.

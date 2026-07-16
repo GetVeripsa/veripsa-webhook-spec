@@ -1,6 +1,7 @@
 /**
  * Public TypeScript declarations for the Veripsa GitHub App integration
- * surface. These types describe stable tokens and public payload shapes only.
+ * surface. These types describe normalized public signals, not raw GitHub
+ * webhook or check-run payloads. See OUTPUT.md for the normalization rules.
  * They do not expose Veripsa Core engine internals.
  */
 
@@ -19,7 +20,16 @@ export type VeripsaVerdictToken =
   | "Unknown"
   | "Paused (acknowledge to proceed)"
   | "Acknowledged"
-  | "Unresolved merge conflict markers";
+  | "Unresolved merge conflict markers"
+  | "Acknowledgement verification pending"
+  | "Heading to"
+  | "Watching"
+  | "Early-access limit reached"
+  | "Changed files not read"
+  | "Branch state not verified"
+  | "Merge queue: clear"
+  | "Merge queue: review overlap"
+  | "Merge queue: not analyzed";
 
 export type VeripsaUnderlyingVerdict =
   | "clear"
@@ -29,13 +39,17 @@ export type VeripsaUnderlyingVerdict =
   | "merge_conflict_markers";
 
 export interface VeripsaCheckRunSignal {
+  /**
+   * Normalized view: `name` = check_run.name, `title` = check_run.output.title,
+   * `conclusion` = check_run.conclusion, and `token` follows OUTPUT.md.
+   */
   /** Literal check-run name posted by the GitHub App. */
   name: VeripsaCheckName;
 
   /** Human title. Branch on `token`, not the full title string. */
   title: string;
 
-  /** Stable token after `Veripsa — `. */
+  /** Stable normalized token derived from the observable title. */
   token: VeripsaVerdictToken;
 
   /** GitHub check-run conclusion. */
@@ -64,7 +78,10 @@ export interface VeripsaPrCommentSurface {
   /** Optional marker that binds ack to a specific material coupling. */
   ackSnapshotMarker?: `<!-- veripsa-ack-snap:${string} -->`;
 
-  /** Leading bold token in the rendered Markdown body. */
+  /**
+   * Normalized verdict prefix for a coordination comment. These legacy values
+   * are not the full human-facing bold sentence; see OUTPUT.md.
+   */
   leadingVerdict:
     | "Clear to land."
     | "Wait in line."
@@ -102,7 +119,8 @@ export interface VeripsaWebhookRoutingEvent {
     | "installation"
     | "installation_repositories";
   action?: string;
-  repositoryFullName: string;
+  /** Present for repository-scoped events; absent for account-level lifecycle events. */
+  repositoryFullName?: string;
   installationId?: number;
   prNumber?: number;
   headSha?: string;

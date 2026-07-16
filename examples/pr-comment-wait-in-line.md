@@ -1,10 +1,15 @@
 <!-- veripsa:PR-43 -->
+<!-- veripsa-ack-snap:9f13ab7c0d42 -->
 
-**Wait in line.**
+### Veripsa — heading to `main`
 
-> Veripsa paused this PR because it overlaps with in-flight work. Add the
-> `veripsa-ack` label only after you have read the overlap and decided to
-> proceed deliberately.
+**⏸ Wait in line — a direct collision is ahead**
+
+> **⏸ This check needs attention because the PR overlaps in-flight work.**
+> Review the overlap below. You can wait for the other PR to land, or optionally
+> add `veripsa-ack` to record that you saw this specific coupling and chose to
+> proceed. Whether `action_required` holds the merge depends on your repository's
+> branch-protection policy.
 
 This PR overlaps with `PR-42` around:
 
@@ -12,5 +17,3 @@ This PR overlaps with `PR-42` around:
 - `tests/test_pricing.py`
 
 No source file contents or diffs are included in this comment.
-
-<!-- veripsa-ack-snap:9f13ab7c0d42 -->

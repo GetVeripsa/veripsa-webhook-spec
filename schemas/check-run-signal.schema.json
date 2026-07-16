@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/GetVeripsa/veripsa-webhook-spec/schemas/check-run-signal.schema.json",
-  "title": "Veripsa check-run signal",
-  "description": "Stable public fields an integrator can branch on after reading a Veripsa GitHub check run.",
+  "title": "Veripsa normalized check-run signal",
+  "description": "A normalized view derived from a GitHub check run. name comes from check_run.name, title from check_run.output.title, conclusion from check_run.conclusion, and token is parsed using OUTPUT.md. This is not the raw GitHub payload.",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -29,7 +29,16 @@
         "Unknown",
         "Paused (acknowledge to proceed)",
         "Acknowledged",
-        "Unresolved merge conflict markers"
+        "Unresolved merge conflict markers",
+        "Acknowledgement verification pending",
+        "Heading to",
+        "Watching",
+        "Early-access limit reached",
+        "Changed files not read",
+        "Branch state not verified",
+        "Merge queue: clear",
+        "Merge queue: review overlap",
+        "Merge queue: not analyzed"
       ]
     },
     "conclusion": {
@@ -71,7 +80,10 @@
       "if": {
         "properties": {
           "token": {
-            "const": "Clear"
+            "enum": [
+              "Clear",
+              "Clear to land"
+            ]
           }
         },
         "required": [
@@ -90,7 +102,10 @@
       "if": {
         "properties": {
           "token": {
-            "const": "Paused (acknowledge to proceed)"
+            "enum": [
+              "Paused (acknowledge to proceed)",
+              "Unresolved merge conflict markers"
+            ]
           }
         },
         "required": [
@@ -109,7 +124,20 @@
       "if": {
         "properties": {
           "token": {
-            "const": "Unresolved merge conflict markers"
+            "enum": [
+              "Heads up",
+              "Wait in line",
+              "Unknown",
+              "Acknowledged",
+              "Acknowledgement verification pending",
+              "Heading to",
+              "Watching",
+              "Early-access limit reached",
+              "Changed files not read",
+              "Branch state not verified",
+              "Merge queue: review overlap",
+              "Merge queue: not analyzed"
+            ]
           }
         },
         "required": [
@@ -119,7 +147,26 @@
       "then": {
         "properties": {
           "conclusion": {
-            "const": "action_required"
+            "const": "neutral"
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "token": {
+            "const": "Merge queue: clear"
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "then": {
+        "properties": {
+          "conclusion": {
+            "const": "success"
           }
         }
       }
