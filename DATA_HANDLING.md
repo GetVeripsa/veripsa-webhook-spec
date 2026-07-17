@@ -35,7 +35,7 @@ The retained data is content-free service metadata, including:
 - content-free structural metadata such as language, file/config/schema and
   symbol names and kinds, and named relationship types between those records;
 - content-free working state such as advisory state, in-flight coordination,
-  graph freshness/counts, and check, comment, and optional ACK state;
+  coverage freshness/counts, and check, comment, and optional ACK state;
 - delivery and lifecycle metadata such as event/action, processing status,
   retry state, outcome, and operational error details.
 
