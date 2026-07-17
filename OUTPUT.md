@@ -108,7 +108,10 @@ coordination verdict. Normalize their observable titles to the tokens below:
   existing ACK without silently rebinding it while branch state is unavailable.
   Token: `Acknowledgement verification pending`.
 - **"Veripsa — heading to <branch>"** — no in-flight reservation is recorded
-  for that PR yet. Token: `Heading to`; the branch is dynamic display text.
+  for that PR yet. A PR with no analyzable surface (for example a docs-only
+  change) keeps this state for its whole life — that is the designed
+  honest-empty outcome, not a stall, and its `success` conclusion satisfies a
+  required check. Token: `Heading to`; the branch is dynamic display text.
 - **"Veripsa — merge queue: clear"**, **"review overlap"**, or **"not
   analyzed"** — the observable merge-group states. Tokens: `Merge queue:
   clear`, `Merge queue: review overlap`, and `Merge queue: not analyzed`.
