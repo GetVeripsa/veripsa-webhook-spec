@@ -160,9 +160,8 @@ levels, not private analysis or scoring mechanics.
 | Stylesheet structural | CSS, SCSS/Sass, Less, and Stylus |
 | File-level fallback | Other changed paths remain eligible for direct same-file collision detection. |
 
-Framework and stylesheet tiers can contribute content-free structural records
-to the repository graph. This describes coverage, not private relationship,
-ranking, or verdict mechanics. When coverage is insufficient, Veripsa returns
+Framework and stylesheet tiers also contribute to coverage. This describes
+coverage, not private relationship, ranking, or verdict mechanics. When coverage is insufficient, Veripsa returns
 `Unknown` rather than a false `Clear`.
 
 If there is a language you need covered, [open a feature

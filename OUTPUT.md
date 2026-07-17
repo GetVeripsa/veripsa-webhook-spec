@@ -113,8 +113,8 @@ coordination verdict. Normalize their observable titles to the tokens below:
   analyzed"** — the observable merge-group states. Tokens: `Merge queue:
   clear`, `Merge queue: review overlap`, and `Merge queue: not analyzed`.
 
-All of these operational states are `neutral` except `Merge queue: clear`,
-which is `success`.
+All of these operational states are `neutral` except `Merge queue: clear`
+and `Heading to <branch>`, which are `success`.
 
 ## Unresolved merge conflict markers
 
