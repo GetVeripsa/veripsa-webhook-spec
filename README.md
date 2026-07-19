@@ -1,6 +1,8 @@
 # veripsa-webhook-spec
 
-The public integration contract for the **Veripsa GitHub App** — the advisory, content-free GitHub App that helps teams notice risky PR landing order before `main` changes.
+The public integration contract for **Veripsa Core** — the advisory,
+content-free GitHub App for pre-merge PR traffic control between open pull
+requests.
 
 This repository is the open-source surface that external tools can build against. It defines:
 
@@ -23,6 +25,7 @@ integrators can treat the public output surface as a stable contract.
 | Need | Link |
 | --- | --- |
 | Product overview | <https://veripsa.com/how-it-works> |
+| Collision walkthrough | <https://veripsa.com/collision> |
 | Data handling and retention | [`DATA_HANDLING.md`](./DATA_HANDLING.md) |
 | Agent usage guide | <https://veripsa.com/docs/with-agents> |
 | Recent improvements | <https://veripsa.com/whats-new> |
@@ -42,20 +45,23 @@ integrators can treat the public output surface as a stable contract.
   stays private.
 - It is **not** an API to call into Veripsa. The App is event-driven over
   GitHub webhooks; there is no public REST surface for integrators today.
-- It is **not** an SLA. Veripsa is **advisory** — the check it posts is
-  non-blocking by default; your branch-protection policy decides what is
-  required to merge.
+- It is **not** an SLA. Veripsa is **advisory by default**; branch protection
+  or rulesets decide whether an `action_required` check conclusion holds a
+  merge.
 
 ## Current integration scope
 
 - Veripsa is **content-free by design**: it does not store or display customer
-  source file bodies. This repo documents the public output contract, not a
-  code-review surface.
+  source file bodies or diff contents. This repo documents the public output
+  contract, not a code-review surface.
 - Veripsa coordinates work **within one installed repository** today.
   Cross-repository coordination is not a claim made by this spec.
-- Veripsa is **not a merge queue** and **not an AI reviewer**. It gives teams a
-  GitHub-native warning before a risky landing order turns into a `main`
-  problem.
+- Veripsa works alongside merge queues, AI reviewers, CI, tests, and human
+  review. It adds the earlier open-PR collision and landing-order signal before
+  `main` changes.
+- The four base traffic signals are **Clear**, **Heads up**, **Wait in line**,
+  and **Unknown**. A material coupling may add **Paused (acknowledge to
+  proceed)** as a control overlay; Paused is not a fifth traffic verdict.
 
 ## Repository map
 
@@ -66,11 +72,9 @@ integrators can treat the public output surface as a stable contract.
   subscribes to, the GitHub permissions it requests, the events it
   explicitly does **not** subscribe to, and a high-level note on
   language coverage.
-- [`OUTPUT.md`](./OUTPUT.md) — the verdict ladder (Clear / Heads up /
-  Wait in line / Unknown), high-salience material-collision and optional
-  acknowledgement states, GitHub
-  `conclusion` mapping, PR-comment marker convention, and idempotent-upsert
-  contract.
+- [`OUTPUT.md`](./OUTPUT.md) — the four base traffic signals, material-coupling
+  Paused/Acknowledged controls, GitHub `conclusion` mapping, PR-comment marker
+  convention, and idempotent-upsert contract.
 - [`ACK_LABEL.md`](./ACK_LABEL.md) — the `veripsa-ack` label: what adding
   it means, what removing it means, who can add it, and the stale-ack rule.
 - [`schemas/`](./schemas/) — JSON Schemas for the public contract surfaces.
