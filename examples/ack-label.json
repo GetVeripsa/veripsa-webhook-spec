@@ -1,0 +1,8 @@
+{
+  "name": "veripsa-ack",
+  "meaning": "seen_and_proceeding",
+  "repositoryDefinitionCreatedBy": "veripsa_when_needed",
+  "appliedToPullRequestBy": "human_or_agent",
+  "effectWhenPaused": "action_required_to_neutral",
+  "staleWhenMaterialCouplingChanges": true
+}

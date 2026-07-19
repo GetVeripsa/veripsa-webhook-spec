@@ -4,8 +4,5 @@
   "token": "Paused (acknowledge to proceed)",
   "conclusion": "action_required",
   "underlyingVerdict": "wait_in_line",
-  "acknowledged": false,
-  "prNumber": 43,
-  "repositoryFullName": "example/repo",
-  "headSha": "89abcdef0123456789abcdef0123456789abcdef"
+  "acknowledged": true
 }

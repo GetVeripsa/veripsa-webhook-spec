@@ -1,0 +1,11 @@
+{
+  "event": "installation_repositories",
+  "action": "added",
+  "installationId": 12345678,
+  "accountLogin": "example-org",
+  "accountType": "Organization",
+  "repositoriesAdded": [
+    "example/repo"
+  ],
+  "repositoriesRemoved": []
+}

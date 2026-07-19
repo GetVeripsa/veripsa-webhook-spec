@@ -1,0 +1,119 @@
+{
+  "contractVersion": "1.0.0",
+  "events": [
+    {
+      "event": "pull_request",
+      "required": [
+        "action",
+        "installationId",
+        "repositoryFullName",
+        "prNumber",
+        "headSha",
+        "baseRef"
+      ],
+      "optional": [
+        "branchRef"
+      ],
+      "uses": "PR lifecycle, head/base identity, changed-file routing, and exact veripsa-ack label transitions.",
+      "retained": "Reduced identifiers, refs, labels, paths, processing state, and timestamps as documented in DATA_HANDLING.md.",
+      "transient": "Original webhook body, PR/source/diff bodies, and fields outside the reduced routing surface."
+    },
+    {
+      "event": "push",
+      "required": [
+        "installationId",
+        "repositoryFullName",
+        "branchRef",
+        "headSha"
+      ],
+      "optional": [
+        "action"
+      ],
+      "uses": "Direct-to-branch and branch-only work tracking.",
+      "retained": "Reduced repository/ref/commit and processing metadata.",
+      "transient": "Original webhook body and commit/file bodies."
+    },
+    {
+      "event": "repository",
+      "required": [
+        "action",
+        "installationId",
+        "repositoryFullName"
+      ],
+      "optional": [],
+      "uses": "Rename, transfer, archive, and deletion lifecycle consistency.",
+      "retained": "Reduced repository and lifecycle identifiers/status.",
+      "transient": "Original webhook body and unrelated repository fields."
+    },
+    {
+      "event": "check_suite",
+      "required": [
+        "action",
+        "installationId",
+        "repositoryFullName"
+      ],
+      "optional": [
+        "headSha"
+      ],
+      "uses": "Observe other check completion and recover a missing fresh-head Veripsa check.",
+      "retained": "Reduced check/head identifiers and processing outcome when needed operationally.",
+      "transient": "Check output bodies and unrelated suite payload fields."
+    },
+    {
+      "event": "check_run",
+      "required": [
+        "action",
+        "installationId",
+        "repositoryFullName"
+      ],
+      "optional": [
+        "headSha"
+      ],
+      "uses": "Observe other check completion and the App's own requested-check lifecycle.",
+      "retained": "Reduced check/head identifiers and processing outcome when needed operationally.",
+      "transient": "Other providers' check output text and unrelated payload fields."
+    },
+    {
+      "event": "merge_group",
+      "required": [
+        "action",
+        "installationId",
+        "repositoryFullName",
+        "headSha",
+        "baseRef"
+      ],
+      "optional": [],
+      "uses": "Keep the in-flight view consistent with GitHub merge queues.",
+      "retained": "Reduced merge-group, repository, ref, head, and processing metadata.",
+      "transient": "Original webhook body and unrelated merge-group fields."
+    },
+    {
+      "event": "installation",
+      "required": [
+        "action",
+        "installationId",
+        "accountLogin",
+        "accountType"
+      ],
+      "optional": [],
+      "uses": "Install, suspend, unsuspend, and uninstall lifecycle.",
+      "retained": "Installation/account identifiers and lifecycle audit metadata.",
+      "transient": "Original webhook body and unrelated account fields."
+    },
+    {
+      "event": "installation_repositories",
+      "required": [
+        "action",
+        "installationId",
+        "accountLogin",
+        "accountType",
+        "repositoriesAdded",
+        "repositoriesRemoved"
+      ],
+      "optional": [],
+      "uses": "Add or remove repositories from an installation.",
+      "retained": "Installation/account/repository identifiers and lifecycle processing state.",
+      "transient": "Original webhook body and unrelated repository fields."
+    }
+  ]
+}

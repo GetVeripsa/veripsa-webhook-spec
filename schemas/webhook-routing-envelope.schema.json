@@ -1,0 +1,302 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/GetVeripsa/veripsa-webhook-spec/raw/v1.0.0/schemas/webhook-routing-envelope.schema.json",
+  "title": "Veripsa normalized webhook-routing envelope",
+  "description": "A discriminated normalized envelope covering every public event family listed in EVENTS.md. It is not a raw GitHub webhook body.",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event",
+        "action",
+        "installationId",
+        "repositoryFullName",
+        "prNumber",
+        "headSha",
+        "baseRef"
+      ],
+      "properties": {
+        "event": {
+          "const": "pull_request"
+        },
+        "action": {
+          "type": "string",
+          "minLength": 1
+        },
+        "installationId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "repositoryFullName": {
+          "type": "string",
+          "pattern": "^[^/\\s]+/[^/\\s]+$"
+        },
+        "prNumber": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "headSha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "baseRef": {
+          "type": "string",
+          "minLength": 1
+        },
+        "branchRef": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event",
+        "installationId",
+        "repositoryFullName",
+        "branchRef",
+        "headSha"
+      ],
+      "properties": {
+        "event": {
+          "const": "push"
+        },
+        "installationId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "repositoryFullName": {
+          "type": "string",
+          "pattern": "^[^/\\s]+/[^/\\s]+$"
+        },
+        "branchRef": {
+          "type": "string",
+          "minLength": 1
+        },
+        "headSha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "action": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event",
+        "action",
+        "installationId",
+        "repositoryFullName"
+      ],
+      "properties": {
+        "event": {
+          "const": "repository"
+        },
+        "action": {
+          "type": "string",
+          "minLength": 1
+        },
+        "installationId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "repositoryFullName": {
+          "type": "string",
+          "pattern": "^[^/\\s]+/[^/\\s]+$"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event",
+        "action",
+        "installationId",
+        "repositoryFullName"
+      ],
+      "properties": {
+        "event": {
+          "const": "check_suite"
+        },
+        "action": {
+          "type": "string",
+          "minLength": 1
+        },
+        "installationId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "repositoryFullName": {
+          "type": "string",
+          "pattern": "^[^/\\s]+/[^/\\s]+$"
+        },
+        "headSha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event",
+        "action",
+        "installationId",
+        "repositoryFullName"
+      ],
+      "properties": {
+        "event": {
+          "const": "check_run"
+        },
+        "action": {
+          "type": "string",
+          "minLength": 1
+        },
+        "installationId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "repositoryFullName": {
+          "type": "string",
+          "pattern": "^[^/\\s]+/[^/\\s]+$"
+        },
+        "headSha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event",
+        "action",
+        "installationId",
+        "repositoryFullName",
+        "headSha",
+        "baseRef"
+      ],
+      "properties": {
+        "event": {
+          "const": "merge_group"
+        },
+        "action": {
+          "type": "string",
+          "minLength": 1
+        },
+        "installationId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "repositoryFullName": {
+          "type": "string",
+          "pattern": "^[^/\\s]+/[^/\\s]+$"
+        },
+        "headSha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "baseRef": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event",
+        "action",
+        "installationId",
+        "accountLogin",
+        "accountType"
+      ],
+      "properties": {
+        "event": {
+          "const": "installation"
+        },
+        "action": {
+          "type": "string",
+          "minLength": 1
+        },
+        "installationId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "accountLogin": {
+          "type": "string",
+          "minLength": 1
+        },
+        "accountType": {
+          "enum": [
+            "User",
+            "Organization"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "event",
+        "action",
+        "installationId",
+        "accountLogin",
+        "accountType",
+        "repositoriesAdded",
+        "repositoriesRemoved"
+      ],
+      "properties": {
+        "event": {
+          "const": "installation_repositories"
+        },
+        "action": {
+          "type": "string",
+          "minLength": 1
+        },
+        "installationId": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "accountLogin": {
+          "type": "string",
+          "minLength": 1
+        },
+        "accountType": {
+          "enum": [
+            "User",
+            "Organization"
+          ]
+        },
+        "repositoriesAdded": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[^/\\s]+/[^/\\s]+$"
+          }
+        },
+        "repositoriesRemoved": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[^/\\s]+/[^/\\s]+$"
+          }
+        }
+      }
+    }
+  ]
+}

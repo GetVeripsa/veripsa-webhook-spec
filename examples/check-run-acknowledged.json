@@ -1,0 +1,11 @@
+{
+  "name": "Veripsa",
+  "title": "Veripsa — Acknowledged",
+  "token": "Acknowledged",
+  "conclusion": "neutral",
+  "underlyingVerdict": "heads_up",
+  "acknowledged": true,
+  "prNumber": 43,
+  "repositoryFullName": "example/repo",
+  "headSha": "89abcdef0123456789abcdef0123456789abcdef"
+}

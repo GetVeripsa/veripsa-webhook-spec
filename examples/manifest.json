@@ -1,0 +1,102 @@
+[
+  {
+    "file": "examples/check-run-clear.json",
+    "schema": "schemas/check-run-signal.schema.json",
+    "valid": true
+  },
+  {
+    "file": "examples/check-run-clear-to-land.json",
+    "schema": "schemas/check-run-signal.schema.json",
+    "valid": true
+  },
+  {
+    "file": "examples/check-run-heading-to.json",
+    "schema": "schemas/check-run-signal.schema.json",
+    "valid": true
+  },
+  {
+    "file": "examples/check-run-paused.json",
+    "schema": "schemas/check-run-signal.schema.json",
+    "valid": true
+  },
+  {
+    "file": "examples/check-run-acknowledged.json",
+    "schema": "schemas/check-run-signal.schema.json",
+    "valid": true
+  },
+  {
+    "file": "examples/pr-comment-surface.json",
+    "schema": "schemas/pr-comment-surface.schema.json",
+    "valid": true
+  },
+  {
+    "file": "examples/ack-label.json",
+    "schema": "schemas/ack-label.schema.json",
+    "valid": true
+  },
+  {
+    "file": "examples/webhook-envelope-pull-request.json",
+    "schema": "schemas/webhook-routing-envelope.schema.json",
+    "valid": true
+  },
+  {
+    "file": "examples/webhook-envelope-check-run.json",
+    "schema": "schemas/webhook-routing-envelope.schema.json",
+    "valid": true
+  },
+  {
+    "file": "examples/webhook-envelope-installation-repositories.json",
+    "schema": "schemas/webhook-routing-envelope.schema.json",
+    "valid": true
+  },
+  {
+    "file": "examples/raw-pull-request-opened.json",
+    "schema": "schemas/webhook-routing-event.schema.json",
+    "valid": true
+  },
+  {
+    "file": "examples/pull-request-opened-routing-event.json",
+    "schema": "schemas/webhook-routing-event.schema.json",
+    "valid": true
+  },
+  {
+    "file": "examples/invalid/check-clear-neutral.json",
+    "schema": "schemas/check-run-signal.schema.json",
+    "valid": false
+  },
+  {
+    "file": "examples/invalid/check-heading-neutral.json",
+    "schema": "schemas/check-run-signal.schema.json",
+    "valid": false
+  },
+  {
+    "file": "examples/invalid/check-paused-neutral.json",
+    "schema": "schemas/check-run-signal.schema.json",
+    "valid": false
+  },
+  {
+    "file": "examples/invalid/check-ack-action-required.json",
+    "schema": "schemas/check-run-signal.schema.json",
+    "valid": false
+  },
+  {
+    "file": "examples/invalid/check-markers-success.json",
+    "schema": "schemas/check-run-signal.schema.json",
+    "valid": false
+  },
+  {
+    "file": "examples/invalid/check-paused-ack-true.json",
+    "schema": "schemas/check-run-signal.schema.json",
+    "valid": false
+  },
+  {
+    "file": "examples/invalid/check-ack-false.json",
+    "schema": "schemas/check-run-signal.schema.json",
+    "valid": false
+  },
+  {
+    "file": "examples/invalid/raw-pr-number-mismatch.json",
+    "schema": "schemas/webhook-routing-event.schema.json",
+    "valid": false
+  }
+]

@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
   - name: Veripsa support
-    url: https://veripsa.com
-    about: For account, billing, or installation questions, please reach out via veripsa.com — this repo is for the public webhook spec only.
+    url: https://veripsa.com/support
+    about: Account, installation, and billing questions belong in the canonical support channel.
   - name: Recent Veripsa changes
     url: https://veripsa.com/whats-new
-    about: Check the canonical product change log before reporting a behavior change.
+    about: Check user-visible product changes before reporting public-contract drift.

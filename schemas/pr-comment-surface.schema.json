@@ -1,58 +1,27 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/GetVeripsa/veripsa-webhook-spec/schemas/pr-comment-surface.schema.json",
+  "$id": "https://github.com/GetVeripsa/veripsa-webhook-spec/raw/v1.0.0/schemas/pr-comment-surface.schema.json",
   "title": "Veripsa normalized coordination-comment surface",
-  "description": "Normalized verdict prefix, stable markers, and content-free refs for a verdict-bearing coordination comment. This is not the raw Markdown body and does not model every operational comment.",
+  "description": "Normalized stable markers and content-free refs. A clean Clear result is check-only; clear comments normalize to Clear to land.",
   "type": "object",
   "additionalProperties": false,
-  "required": [
-    "marker",
-    "leadingVerdict"
-  ],
+  "required": ["marker", "leadingVerdict"],
   "properties": {
-    "marker": {
-      "type": "string",
-      "pattern": "^<!-- veripsa:PR-[1-9][0-9]* -->$"
-    },
+    "marker": {"type": "string", "pattern": "^<!-- veripsa:PR-[1-9][0-9]* -->$"},
     "ackSnapshotMarker": {
       "type": "string",
-      "pattern": "^<!-- veripsa-ack-snap:[0-9a-f]{12} -->$"
+      "pattern": "^<!-- veripsa-ack-snap:[0-9a-f]{12} -->$",
+      "description": "The 12-lowercase-hex wire token is opaque; do not infer meaning from its value."
     },
-    "leadingVerdict": {
-      "type": "string",
-      "description": "Legacy normalized value derived from the evolving bold human lead; do not match the full Markdown sentence.",
-      "enum": [
-        "Clear to land.",
-        "Wait in line.",
-        "Heads up.",
-        "Heads up — minor overlap.",
-        "Unknown.",
-        "Acknowledged."
-      ]
-    },
-    "partnerRefs": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "pattern": "^PR-[1-9][0-9]*$"
-      },
-      "uniqueItems": true
-    },
-    "branchRefs": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "pattern": "^BR-[A-Za-z0-9._-]+$"
-      },
-      "uniqueItems": true
-    },
-    "paths": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "minLength": 1
-      },
-      "uniqueItems": true
+    "leadingVerdict": {"enum": ["Clear to land.", "Wait in line.", "Heads up.", "Heads up — minor overlap.", "Unknown.", "Acknowledged."]},
+    "partnerRefs": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^PR-[1-9][0-9]*$"}},
+    "branchRefs": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^BR-[A-Za-z0-9._/-]+$"}},
+    "paths": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"leadingVerdict": {"const": "Acknowledged."}}, "required": ["leadingVerdict"]},
+      "then": {"required": ["ackSnapshotMarker"]}
     }
-  }
+  ]
 }

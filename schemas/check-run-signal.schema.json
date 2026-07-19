@@ -1,173 +1,680 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/GetVeripsa/veripsa-webhook-spec/schemas/check-run-signal.schema.json",
+  "$id": "https://github.com/GetVeripsa/veripsa-webhook-spec/raw/v1.0.0/schemas/check-run-signal.schema.json",
   "title": "Veripsa normalized check-run signal",
-  "description": "A normalized view derived from a GitHub check run. name comes from check_run.name, title from check_run.output.title, conclusion from check_run.conclusion, and token is parsed using OUTPUT.md. This is not the raw GitHub payload.",
-  "type": "object",
-  "additionalProperties": false,
-  "required": [
-    "name",
-    "title",
-    "token",
-    "conclusion"
-  ],
-  "properties": {
-    "name": {
-      "const": "Veripsa"
-    },
-    "title": {
-      "type": "string",
-      "description": "Full human-facing check title. Branch on token, not the entire title string."
-    },
-    "token": {
-      "type": "string",
-      "enum": [
-        "Clear",
-        "Clear to land",
-        "Heads up",
-        "Wait in line",
-        "Unknown",
-        "Paused (acknowledge to proceed)",
-        "Acknowledged",
-        "Unresolved merge conflict markers",
-        "Acknowledgement verification pending",
-        "Heading to",
-        "Watching",
-        "Early-access limit reached",
-        "Changed files not read",
-        "Branch state not verified",
-        "Merge queue: clear",
-        "Merge queue: review overlap",
-        "Merge queue: not analyzed"
-      ]
-    },
-    "conclusion": {
-      "type": "string",
-      "enum": [
-        "success",
-        "neutral",
-        "action_required"
-      ]
-    },
-    "underlyingVerdict": {
-      "type": "string",
-      "enum": [
-        "clear",
-        "heads_up",
-        "wait_in_line",
-        "unknown",
-        "merge_conflict_markers"
-      ]
-    },
-    "prNumber": {
-      "type": "integer",
-      "minimum": 1
-    },
-    "repositoryFullName": {
-      "type": "string",
-      "pattern": "^[^/\\s]+/[^/\\s]+$"
-    },
-    "headSha": {
-      "type": "string",
-      "pattern": "^[0-9a-f]{40}$"
-    },
-    "acknowledged": {
-      "type": "boolean"
-    }
-  },
-  "allOf": [
+  "description": "Normalized public signal derived from check_run.name, check_run.output.title, and check_run.conclusion. The oneOf branches reject impossible token/conclusion/underlying-verdict/ack combinations.",
+  "oneOf": [
     {
-      "if": {
-        "properties": {
-          "token": {
-            "enum": [
-              "Clear",
-              "Clear to land"
-            ]
-          }
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "title",
+        "token",
+        "conclusion",
+        "underlyingVerdict"
+      ],
+      "properties": {
+        "name": {
+          "const": "Veripsa"
         },
-        "required": [
-          "token"
-        ]
-      },
-      "then": {
-        "properties": {
-          "conclusion": {
-            "const": "success"
-          }
+        "title": {
+          "type": "string",
+          "pattern": "^Veripsa — Clear(?: — .+)?$"
+        },
+        "token": {
+          "const": "Clear"
+        },
+        "conclusion": {
+          "const": "success"
+        },
+        "underlyingVerdict": {
+          "const": "clear"
+        },
+        "prNumber": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "repositoryFullName": {
+          "type": "string",
+          "pattern": "^[^/\\s]+/[^/\\s]+$"
+        },
+        "headSha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
         }
       }
     },
     {
-      "if": {
-        "properties": {
-          "token": {
-            "enum": [
-              "Paused (acknowledge to proceed)",
-              "Unresolved merge conflict markers"
-            ]
-          }
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "title",
+        "token",
+        "conclusion",
+        "underlyingVerdict"
+      ],
+      "properties": {
+        "name": {
+          "const": "Veripsa"
         },
-        "required": [
-          "token"
-        ]
-      },
-      "then": {
-        "properties": {
-          "conclusion": {
-            "const": "action_required"
-          }
+        "title": {
+          "type": "string",
+          "pattern": "^Veripsa — Clear to land(?: — .+)?$"
+        },
+        "token": {
+          "const": "Clear to land"
+        },
+        "conclusion": {
+          "const": "success"
+        },
+        "underlyingVerdict": {
+          "const": "clear"
+        },
+        "prNumber": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "repositoryFullName": {
+          "type": "string",
+          "pattern": "^[^/\\s]+/[^/\\s]+$"
+        },
+        "headSha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
         }
       }
     },
     {
-      "if": {
-        "properties": {
-          "token": {
-            "enum": [
-              "Heads up",
-              "Wait in line",
-              "Unknown",
-              "Acknowledged",
-              "Acknowledgement verification pending",
-              "Heading to",
-              "Watching",
-              "Early-access limit reached",
-              "Changed files not read",
-              "Branch state not verified",
-              "Merge queue: review overlap",
-              "Merge queue: not analyzed"
-            ]
-          }
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "title",
+        "token",
+        "conclusion",
+        "underlyingVerdict"
+      ],
+      "properties": {
+        "name": {
+          "const": "Veripsa"
         },
-        "required": [
-          "token"
-        ]
-      },
-      "then": {
-        "properties": {
-          "conclusion": {
-            "const": "neutral"
-          }
+        "title": {
+          "type": "string",
+          "pattern": "^Veripsa — Heads up(?: — .+)?$"
+        },
+        "token": {
+          "const": "Heads up"
+        },
+        "conclusion": {
+          "const": "neutral"
+        },
+        "underlyingVerdict": {
+          "const": "heads_up"
+        },
+        "prNumber": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "repositoryFullName": {
+          "type": "string",
+          "pattern": "^[^/\\s]+/[^/\\s]+$"
+        },
+        "headSha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
         }
       }
     },
     {
-      "if": {
-        "properties": {
-          "token": {
-            "const": "Merge queue: clear"
-          }
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "title",
+        "token",
+        "conclusion",
+        "underlyingVerdict"
+      ],
+      "properties": {
+        "name": {
+          "const": "Veripsa"
         },
-        "required": [
-          "token"
-        ]
-      },
-      "then": {
-        "properties": {
-          "conclusion": {
-            "const": "success"
-          }
+        "title": {
+          "type": "string",
+          "pattern": "^Veripsa — Wait in line(?: — .+)?$"
+        },
+        "token": {
+          "const": "Wait in line"
+        },
+        "conclusion": {
+          "const": "neutral"
+        },
+        "underlyingVerdict": {
+          "const": "wait_in_line"
+        },
+        "prNumber": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "repositoryFullName": {
+          "type": "string",
+          "pattern": "^[^/\\s]+/[^/\\s]+$"
+        },
+        "headSha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "title",
+        "token",
+        "conclusion",
+        "underlyingVerdict"
+      ],
+      "properties": {
+        "name": {
+          "const": "Veripsa"
+        },
+        "title": {
+          "type": "string",
+          "pattern": "^Veripsa — Unknown(?: — .+)?$"
+        },
+        "token": {
+          "const": "Unknown"
+        },
+        "conclusion": {
+          "const": "neutral"
+        },
+        "underlyingVerdict": {
+          "const": "unknown"
+        },
+        "prNumber": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "repositoryFullName": {
+          "type": "string",
+          "pattern": "^[^/\\s]+/[^/\\s]+$"
+        },
+        "headSha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "title",
+        "token",
+        "conclusion",
+        "underlyingVerdict"
+      ],
+      "properties": {
+        "name": {
+          "const": "Veripsa"
+        },
+        "title": {
+          "type": "string",
+          "pattern": "^Veripsa — Paused \\(acknowledge to proceed\\)(?: — .+)?$"
+        },
+        "token": {
+          "const": "Paused (acknowledge to proceed)"
+        },
+        "conclusion": {
+          "const": "action_required"
+        },
+        "underlyingVerdict": {
+          "enum": [
+            "heads_up",
+            "wait_in_line"
+          ]
+        },
+        "prNumber": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "repositoryFullName": {
+          "type": "string",
+          "pattern": "^[^/\\s]+/[^/\\s]+$"
+        },
+        "headSha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "acknowledged": {
+          "const": false
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "title",
+        "token",
+        "conclusion",
+        "underlyingVerdict",
+        "acknowledged"
+      ],
+      "properties": {
+        "name": {
+          "const": "Veripsa"
+        },
+        "title": {
+          "type": "string",
+          "pattern": "^Veripsa — Acknowledged(?: — .+)?$"
+        },
+        "token": {
+          "const": "Acknowledged"
+        },
+        "conclusion": {
+          "const": "neutral"
+        },
+        "underlyingVerdict": {
+          "enum": [
+            "heads_up",
+            "wait_in_line"
+          ]
+        },
+        "prNumber": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "repositoryFullName": {
+          "type": "string",
+          "pattern": "^[^/\\s]+/[^/\\s]+$"
+        },
+        "headSha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "acknowledged": {
+          "const": true
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "title",
+        "token",
+        "conclusion",
+        "underlyingVerdict"
+      ],
+      "properties": {
+        "name": {
+          "const": "Veripsa"
+        },
+        "title": {
+          "type": "string",
+          "pattern": "^Veripsa — Unresolved merge conflict markers$"
+        },
+        "token": {
+          "const": "Unresolved merge conflict markers"
+        },
+        "conclusion": {
+          "const": "action_required"
+        },
+        "underlyingVerdict": {
+          "const": "merge_conflict_markers"
+        },
+        "prNumber": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "repositoryFullName": {
+          "type": "string",
+          "pattern": "^[^/\\s]+/[^/\\s]+$"
+        },
+        "headSha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "title",
+        "token",
+        "conclusion"
+      ],
+      "properties": {
+        "name": {
+          "const": "Veripsa"
+        },
+        "title": {
+          "type": "string",
+          "pattern": "^Veripsa — acknowledgement verification pending$"
+        },
+        "token": {
+          "const": "Acknowledgement verification pending"
+        },
+        "conclusion": {
+          "const": "neutral"
+        },
+        "prNumber": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "repositoryFullName": {
+          "type": "string",
+          "pattern": "^[^/\\s]+/[^/\\s]+$"
+        },
+        "headSha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "title",
+        "token",
+        "conclusion"
+      ],
+      "properties": {
+        "name": {
+          "const": "Veripsa"
+        },
+        "title": {
+          "type": "string",
+          "pattern": "^Veripsa — heading to .+$"
+        },
+        "token": {
+          "const": "Heading to"
+        },
+        "conclusion": {
+          "const": "success"
+        },
+        "prNumber": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "repositoryFullName": {
+          "type": "string",
+          "pattern": "^[^/\\s]+/[^/\\s]+$"
+        },
+        "headSha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "title",
+        "token",
+        "conclusion"
+      ],
+      "properties": {
+        "name": {
+          "const": "Veripsa"
+        },
+        "title": {
+          "type": "string",
+          "pattern": "^Veripsa is now watching$"
+        },
+        "token": {
+          "const": "Watching"
+        },
+        "conclusion": {
+          "const": "neutral"
+        },
+        "prNumber": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "repositoryFullName": {
+          "type": "string",
+          "pattern": "^[^/\\s]+/[^/\\s]+$"
+        },
+        "headSha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "title",
+        "token",
+        "conclusion"
+      ],
+      "properties": {
+        "name": {
+          "const": "Veripsa"
+        },
+        "title": {
+          "type": "string",
+          "pattern": "^Veripsa paused — early-access limit reached$"
+        },
+        "token": {
+          "const": "Early-access limit reached"
+        },
+        "conclusion": {
+          "const": "neutral"
+        },
+        "prNumber": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "repositoryFullName": {
+          "type": "string",
+          "pattern": "^[^/\\s]+/[^/\\s]+$"
+        },
+        "headSha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "title",
+        "token",
+        "conclusion"
+      ],
+      "properties": {
+        "name": {
+          "const": "Veripsa"
+        },
+        "title": {
+          "type": "string",
+          "pattern": "^Veripsa — changed files not read, not analyzed$"
+        },
+        "token": {
+          "const": "Changed files not read"
+        },
+        "conclusion": {
+          "const": "neutral"
+        },
+        "prNumber": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "repositoryFullName": {
+          "type": "string",
+          "pattern": "^[^/\\s]+/[^/\\s]+$"
+        },
+        "headSha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "title",
+        "token",
+        "conclusion"
+      ],
+      "properties": {
+        "name": {
+          "const": "Veripsa"
+        },
+        "title": {
+          "type": "string",
+          "pattern": "^Veripsa — branch state not verified, retrying$"
+        },
+        "token": {
+          "const": "Branch state not verified"
+        },
+        "conclusion": {
+          "const": "neutral"
+        },
+        "prNumber": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "repositoryFullName": {
+          "type": "string",
+          "pattern": "^[^/\\s]+/[^/\\s]+$"
+        },
+        "headSha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "title",
+        "token",
+        "conclusion"
+      ],
+      "properties": {
+        "name": {
+          "const": "Veripsa"
+        },
+        "title": {
+          "type": "string",
+          "pattern": "^Veripsa — merge queue: clear$"
+        },
+        "token": {
+          "const": "Merge queue: clear"
+        },
+        "conclusion": {
+          "const": "success"
+        },
+        "prNumber": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "repositoryFullName": {
+          "type": "string",
+          "pattern": "^[^/\\s]+/[^/\\s]+$"
+        },
+        "headSha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "title",
+        "token",
+        "conclusion"
+      ],
+      "properties": {
+        "name": {
+          "const": "Veripsa"
+        },
+        "title": {
+          "type": "string",
+          "pattern": "^Veripsa — merge queue: review overlap$"
+        },
+        "token": {
+          "const": "Merge queue: review overlap"
+        },
+        "conclusion": {
+          "const": "neutral"
+        },
+        "prNumber": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "repositoryFullName": {
+          "type": "string",
+          "pattern": "^[^/\\s]+/[^/\\s]+$"
+        },
+        "headSha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "title",
+        "token",
+        "conclusion"
+      ],
+      "properties": {
+        "name": {
+          "const": "Veripsa"
+        },
+        "title": {
+          "type": "string",
+          "pattern": "^Veripsa — merge queue: not analyzed$"
+        },
+        "token": {
+          "const": "Merge queue: not analyzed"
+        },
+        "conclusion": {
+          "const": "neutral"
+        },
+        "prNumber": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "repositoryFullName": {
+          "type": "string",
+          "pattern": "^[^/\\s]+/[^/\\s]+$"
+        },
+        "headSha": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
         }
       }
     }
