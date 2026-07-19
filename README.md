@@ -36,7 +36,7 @@ integrators can treat the public output surface as a stable contract.
 - Security and compliance reviewers who want to know exactly which GitHub
   permissions and events the App uses.
 
-## What this is NOT
+## Contract boundary
 
 - It is **not** a description of Veripsa's internal engine, which
   stays private.
@@ -46,7 +46,7 @@ integrators can treat the public output surface as a stable contract.
   non-blocking by default; your branch-protection policy decides what is
   required to merge.
 
-## Honest scope
+## Current integration scope
 
 - Veripsa is **content-free by design**: it does not store or display customer
   source file bodies. This repo documents the public output contract, not a
