@@ -1,0 +1,303 @@
+name: deploy-platform-b17d0a-20260719
+
+on:
+  push:
+    branches:
+      - ops/deploy-platform-b17d0a-20260719
+    paths:
+      - .github/workflows/deploy-platform-b17d0a-20260719.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-platform-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      APP_URL: https://veripsa.com
+      RENDER_SERVICE_ID: srv-d8rs58ernols73frt87g
+      TARGET_SHA: b17d0a03ccf2b282a8bcd6215b4dbba796bb7ca0
+    steps:
+      - name: Require the Render deployment secret
+        shell: bash
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "${RENDER_API_KEY:-}"
+
+      - name: Capture live predecessor and reject overlapping deploys
+        id: previous
+        shell: bash
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+        run: |
+          set -euo pipefail
+          curl -fsS --max-time 30 \
+            -H "Authorization: Bearer $RENDER_API_KEY" \
+            -H "Accept: application/json" \
+            "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys?limit=20" \
+            -o /tmp/render-before.json
+          python3 - /tmp/render-before.json "$GITHUB_OUTPUT" <<'PY'
+          import json, os, sys
+
+          body = json.load(open(sys.argv[1], encoding="utf-8"))
+          items = body if isinstance(body, list) else body.get("deploys", [])
+          deploys = [
+              ((item.get("deploy") if isinstance(item, dict) else None) or item)
+              for item in items
+          ]
+          active_statuses = {
+              "created", "queued", "build_in_progress", "pre_deploy_in_progress",
+              "update_in_progress", "deploying",
+          }
+          active = [
+              (d.get("id"), d.get("status"))
+              for d in deploys
+              if isinstance(d, dict) and d.get("status") in active_statuses
+          ]
+          if active:
+              raise SystemExit(f"active Render deploy exists: {active}")
+
+          live = next(
+              (d for d in deploys if isinstance(d, dict) and d.get("status") == "live"),
+              None,
+          )
+          if not live:
+              raise SystemExit("no live Render predecessor; refusing an unrollbackable release")
+
+          commit = ((live.get("commit") or {}).get("id") or live.get("commitId") or "")
+          deploy_id = live.get("id") or ""
+          if not commit or not deploy_id:
+              raise SystemExit("live predecessor lacks commit/deploy identity")
+
+          with open(sys.argv[2], "a", encoding="utf-8") as out:
+              out.write(f"commit={commit}\n")
+              out.write(f"deploy_id={deploy_id}\n")
+              out.write(
+                  f"already_live={'true' if commit == os.environ['TARGET_SHA'] else 'false'}\n"
+              )
+          print(f"Current live predecessor: {deploy_id} {commit[:12]}")
+          PY
+
+      - name: Queue the exact Platform merge commit
+        id: queue
+        shell: bash
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          ALREADY_LIVE: ${{ steps.previous.outputs.already_live }}
+          EXISTING_DEPLOY_ID: ${{ steps.previous.outputs.deploy_id }}
+        run: |
+          set -euo pipefail
+          if [ "$ALREADY_LIVE" = "true" ]; then
+            echo "mutated=false" >> "$GITHUB_OUTPUT"
+            echo "deploy_id=$EXISTING_DEPLOY_ID" >> "$GITHUB_OUTPUT"
+            echo "Target commit is already live."
+            exit 0
+          fi
+
+          code="$(curl -sS --max-time 30 \
+            -o /tmp/render-create.json \
+            -w '%{http_code}' \
+            -X POST \
+            -H "Authorization: Bearer $RENDER_API_KEY" \
+            -H "Accept: application/json" \
+            -H "Content-Type: application/json" \
+            -d "{\"commitId\":\"${TARGET_SHA}\",\"clearCache\":\"do_not_clear\"}" \
+            "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys" || true)"
+          case "$code" in
+            200|201|202) ;;
+            *) cat /tmp/render-create.json; exit 1 ;;
+          esac
+
+          deploy_id="$(python3 - /tmp/render-create.json <<'PY'
+          import json, sys
+          body = json.load(open(sys.argv[1], encoding="utf-8"))
+          deploy = body.get("deploy", body) if isinstance(body, dict) else {}
+          print(deploy.get("id") or "")
+          PY
+          )"
+          test -n "$deploy_id"
+          echo "mutated=true" >> "$GITHUB_OUTPUT"
+          echo "deploy_id=$deploy_id" >> "$GITHUB_OUTPUT"
+          echo "Queued Render deploy $deploy_id for ${TARGET_SHA:0:12}"
+
+      - name: Wait for the exact commit to become live
+        id: promote
+        continue-on-error: true
+        shell: bash
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          DEPLOY_ID: ${{ steps.queue.outputs.deploy_id }}
+        run: |
+          set -euo pipefail
+          deadline=$(( $(date +%s) + 1800 ))
+          while [ "$(date +%s)" -lt "$deadline" ]; do
+            curl -fsS --max-time 30 \
+              -H "Authorization: Bearer $RENDER_API_KEY" \
+              -H "Accept: application/json" \
+              "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys/${DEPLOY_ID}" \
+              -o /tmp/render-target.json
+            row="$(python3 - /tmp/render-target.json <<'PY'
+          import json, sys
+          body = json.load(open(sys.argv[1], encoding="utf-8"))
+          deploy = body.get("deploy", body) if isinstance(body, dict) else {}
+          status = deploy.get("status") or "unknown"
+          commit = ((deploy.get("commit") or {}).get("id") or deploy.get("commitId") or "")
+          print(f"{status}\t{commit}")
+          PY
+            )"
+            IFS=$'\t' read -r status commit <<< "$row"
+            echo "Render $DEPLOY_ID status=$status commit=${commit:0:12}"
+            case "$status" in
+              live)
+                test "$commit" = "$TARGET_SHA"
+                exit 0
+                ;;
+              build_failed|pre_deploy_failed|update_failed|canceled|deactivated|failed)
+                exit 1
+                ;;
+            esac
+            sleep 10
+          done
+          exit 1
+
+      - name: Verify the production public contract
+        id: smoke
+        if: steps.promote.outcome == 'success'
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          base="${APP_URL%/}"
+          fetch() {
+            local path="$1" name="$2"
+            curl -fsS --retry 8 --retry-all-errors --retry-delay 3 --max-time 45 \
+              -D "/tmp/${name}.headers" "${base}${path}" -o "/tmp/${name}.html"
+          }
+
+          fetch / home
+          fetch /support support
+          fetch /security/disclosure disclosure
+          fetch /trust trust
+          fetch /ja/trust ja_trust
+          fetch /pricing pricing
+          fetch /docs/onboarding onboarding
+          fetch /try try
+          fetch /status status
+          fetch /robots.txt robots
+          fetch /updates/sitemap.xml updates
+
+          grep -Fq "pre-merge PR traffic control" /tmp/home.html
+          ! grep -Fq "GitHub-native merge control" /tmp/home.html
+          grep -Fq "[SECURITY]" /tmp/disclosure.html
+          ! grep -Fq "[security]" /tmp/disclosure.html
+          grep -Fq "within a few business days" /tmp/support.html
+          grep -Fq "contractual support SLA" /tmp/support.html
+          grep -Fq "Retention and deletion" /tmp/trust.html
+          grep -Fq "Rebuildable working data is short-lived" /tmp/trust.html
+          grep -Fq "remain until account erasure" /tmp/trust.html
+          ! grep -Fq "Retention is short by policy and short by construction" /tmp/trust.html
+          grep -Fq "保持期間と削除" /tmp/ja_trust.html
+          grep -Fq "短期保持" /tmp/ja_trust.html
+          grep -Fq "アカウント消去まで保持" /tmp/ja_trust.html
+          ! grep -Fiq "Paddle" /tmp/ja_trust.html
+          grep -Fq "Paused" /tmp/pricing.html
+          grep -Fq "Unknown" /tmp/onboarding.html
+          grep -Fq "collide-a" /tmp/try.html
+          grep -Fq "collide-b" /tmp/try.html
+          grep -Fq "Sitemap: https://veripsa.com/updates/sitemap.xml" /tmp/robots.html
+          grep -Fq "https://veripsa.com/ja/trust" /tmp/updates.html
+          grep -Fq "https://veripsa.com/legal/subprocessors" /tmp/updates.html
+
+          for name in support disclosure trust pricing status; do
+            tr -d '\r' < "/tmp/${name}.headers" | grep -Eiq '^cache-control:.*no-store'
+          done
+
+          cat > release-report.txt <<EOF
+          target_sha=$TARGET_SHA
+          deploy_id=${{ steps.queue.outputs.deploy_id }}
+          predecessor_sha=${{ steps.previous.outputs.commit }}
+          production_smoke=passed
+          EOF
+
+      - name: Roll back after promotion or smoke failure
+        if: >-
+          always() &&
+          steps.queue.outputs.mutated == 'true' &&
+          (steps.promote.outcome != 'success' || steps.smoke.outcome != 'success')
+        shell: bash
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          PREVIOUS_COMMIT: ${{ steps.previous.outputs.commit }}
+        run: |
+          set -euo pipefail
+          code="$(curl -sS --max-time 30 \
+            -o /tmp/render-rollback.json \
+            -w '%{http_code}' \
+            -X POST \
+            -H "Authorization: Bearer $RENDER_API_KEY" \
+            -H "Accept: application/json" \
+            -H "Content-Type: application/json" \
+            -d "{\"commitId\":\"${PREVIOUS_COMMIT}\",\"clearCache\":\"do_not_clear\"}" \
+            "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys" || true)"
+          case "$code" in
+            200|201|202) ;;
+            *) cat /tmp/render-rollback.json; exit 1 ;;
+          esac
+          rollback_id="$(python3 - /tmp/render-rollback.json <<'PY'
+          import json, sys
+          body = json.load(open(sys.argv[1], encoding="utf-8"))
+          deploy = body.get("deploy", body) if isinstance(body, dict) else {}
+          print(deploy.get("id") or "")
+          PY
+          )"
+          test -n "$rollback_id"
+          deadline=$(( $(date +%s) + 1800 ))
+          while [ "$(date +%s)" -lt "$deadline" ]; do
+            curl -fsS --max-time 30 \
+              -H "Authorization: Bearer $RENDER_API_KEY" \
+              -H "Accept: application/json" \
+              "https://api.render.com/v1/services/${RENDER_SERVICE_ID}/deploys/${rollback_id}" \
+              -o /tmp/render-rollback-status.json
+            row="$(python3 - /tmp/render-rollback-status.json <<'PY'
+          import json, sys
+          body = json.load(open(sys.argv[1], encoding="utf-8"))
+          deploy = body.get("deploy", body) if isinstance(body, dict) else {}
+          status = deploy.get("status") or "unknown"
+          commit = ((deploy.get("commit") or {}).get("id") or deploy.get("commitId") or "")
+          print(f"{status}\t{commit}")
+          PY
+            )"
+            IFS=$'\t' read -r status commit <<< "$row"
+            echo "Rollback $rollback_id status=$status commit=${commit:0:12}"
+            case "$status" in
+              live) test "$commit" = "$PREVIOUS_COMMIT"; exit 0 ;;
+              build_failed|pre_deploy_failed|update_failed|canceled|deactivated|failed) exit 1 ;;
+            esac
+            sleep 10
+          done
+          exit 1
+
+      - name: Upload the release evidence
+        if: steps.smoke.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: platform-release-b17d0a
+          path: release-report.txt
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Require successful promotion and smoke
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "${{ steps.promote.outcome }}" = "success"
+          test "${{ steps.smoke.outcome }}" = "success"
+          echo "Production verified at ${TARGET_SHA}"
