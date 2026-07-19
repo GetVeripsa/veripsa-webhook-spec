@@ -1,0 +1,36 @@
+name: deploy-platform-b17d0a-pr-20260719
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - .github/workflows/deploy-platform-b17d0a-pr-20260719.yml
+      - scripts/deploy-platform-b17d0a-20260719.py
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-platform-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: >-
+      github.head_ref == 'ops/deploy-platform-b17d0a-20260719' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy, verify, and roll back on failure
+        run: python3 scripts/deploy-platform-b17d0a-20260719.py
+      - name: Upload release evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: platform-release-b17d0a
+          path: release-report.json
+          if-no-files-found: error
+          retention-days: 7
