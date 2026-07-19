@@ -7,16 +7,21 @@ on:
       - package.json
       - CHANGELOG.md
       - .github/workflows/release-contract.yml
+  pull_request_target:
+    types: [closed]
+    branches: [main]
 
 permissions:
   contents: write
 
 jobs:
   release:
+    if: github.event_name == 'push' || github.event.pull_request.merged == true
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: main
           fetch-depth: 0
       - name: Create the immutable contract tag and GitHub Release
         shell: bash
@@ -32,9 +37,10 @@ jobs:
             echo "${tag} already exists; leaving the immutable release untouched."
             exit 0
           fi
+          target_sha="$(git rev-parse HEAD)"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git tag -a "$tag" "$GITHUB_SHA" -m "Veripsa public contract ${tag}"
+          git tag -a "$tag" "$target_sha" -m "Veripsa public contract ${tag}"
           git push origin "$tag"
           gh release create "$tag" --verify-tag \
             --title "Veripsa public contract ${tag}" \
