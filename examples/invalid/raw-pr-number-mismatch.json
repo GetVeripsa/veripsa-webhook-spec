@@ -1,0 +1,21 @@
+{
+  "action": "opened",
+  "number": 42,
+  "pull_request": {
+    "number": 43,
+    "head": {
+      "sha": "0123456789abcdef0123456789abcdef01234567",
+      "ref": "x"
+    },
+    "base": {
+      "ref": "main"
+    },
+    "draft": false
+  },
+  "repository": {
+    "full_name": "example/repo"
+  },
+  "installation": {
+    "id": 1
+  }
+}

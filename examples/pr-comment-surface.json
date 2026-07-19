@@ -1,13 +1,12 @@
 {
   "marker": "<!-- veripsa:PR-43 -->",
   "ackSnapshotMarker": "<!-- veripsa-ack-snap:9f13ab7c0d42 -->",
-  "leadingVerdict": "Wait in line.",
+  "leadingVerdict": "Acknowledged.",
   "partnerRefs": [
     "PR-42"
   ],
   "branchRefs": [],
   "paths": [
-    "orders/pricing.py",
-    "tests/test_pricing.py"
+    "orders/pricing.py"
   ]
 }

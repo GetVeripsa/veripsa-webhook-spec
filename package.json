@@ -1,7 +1,7 @@
 {
   "name": "@veripsa/webhook-spec",
-  "version": "0.0.0",
-  "description": "Public integration contract, JSON Schemas, examples, and TypeScript declarations for the Veripsa GitHub App surface.",
+  "version": "1.0.0",
+  "description": "Versioned public integration contract, JSON Schemas, examples, and TypeScript declarations for the Veripsa GitHub App surface.",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
@@ -25,23 +25,47 @@
   ],
   "files": [
     "README.md",
+    "CHANGELOG.md",
+    "COMPATIBILITY.md",
+    "TRUTH_MATRIX.md",
+    "CHECK_STATES.md",
+    "WEBHOOK_EVENTS.md",
     "DATA_HANDLING.md",
     "EVENTS.md",
     "OUTPUT.md",
     "ACK_LABEL.md",
+    "contract/",
     "schemas/",
     "examples/",
     "types/"
   ],
   "exports": {
+    "./contract/check-states": "./contract/check-states.json",
+    "./contract/webhook-events": "./contract/webhook-events.json",
     "./schemas/check-run-signal": "./schemas/check-run-signal.schema.json",
     "./schemas/pr-comment-surface": "./schemas/pr-comment-surface.schema.json",
+    "./schemas/webhook-routing-envelope": "./schemas/webhook-routing-envelope.schema.json",
     "./schemas/webhook-routing-event": "./schemas/webhook-routing-event.schema.json",
     "./schemas/ack-label": "./schemas/ack-label.schema.json",
     "./types": "./types/index.d.ts"
   },
   "types": "./types/index.d.ts",
   "scripts": {
-    "check:json": "node scripts/check-json.mjs"
+    "generate": "node scripts/generate-contract.mjs && node scripts/generate-events.mjs",
+    "check:json": "node scripts/check-json.mjs",
+    "check:schema": "python3 scripts/check-schema.py",
+    "check:examples": "python3 scripts/check-examples.py",
+    "check:types": "node scripts/check-types.mjs",
+    "check:contract": "node scripts/generate-contract.mjs --check && node scripts/generate-events.mjs --check && node scripts/check-contract.mjs",
+    "check:links": "python3 scripts/check-links.py",
+    "check": "npm run check:json && npm run check:schema && npm run check:examples && npm run check:types && npm run check:contract && npm run check:links",
+    "pack:dry-run": "npm pack --dry-run"
+  },
+  "engines": {
+    "node": ">=20",
+    "npm": ">=10"
+  },
+  "devDependencies": {
+    "typescript": "5.8.3"
   }
 }

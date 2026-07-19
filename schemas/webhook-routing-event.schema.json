@@ -1,11 +1,12 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/GetVeripsa/veripsa-webhook-spec/schemas/webhook-routing-event.schema.json",
-  "title": "Veripsa webhook routing event",
-  "description": "Abridged GitHub webhook fields that matter at the public Veripsa routing-contract level.",
+  "$id": "https://github.com/GetVeripsa/veripsa-webhook-spec/raw/v1.0.0/schemas/webhook-routing-event.schema.json",
+  "title": "Legacy selected raw GitHub webhook body shapes",
+  "description": "Compatibility schema for selected raw bodies: pull_request, push, and installation lifecycle. It does not carry the X-GitHub-Event header and is not the complete event contract. New integrations should use webhook-routing-envelope.schema.json.",
+  "$comment": "Deprecated in v1.0.0 for new integrations; retained through the v1 compatibility window.",
   "oneOf": [
     {
-      "title": "pull_request",
+      "title": "pull_request raw body",
       "type": "object",
       "additionalProperties": true,
       "required": [
@@ -17,17 +18,18 @@
       ],
       "properties": {
         "action": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
         "number": {
           "type": "integer",
-          "minimum": 1
+          "minimum": 1,
+          "description": "Canonical PR number for this compatibility schema."
         },
         "pull_request": {
           "type": "object",
           "additionalProperties": true,
           "required": [
-            "number",
             "head",
             "base",
             "draft"
@@ -35,7 +37,8 @@
           "properties": {
             "number": {
               "type": "integer",
-              "minimum": 1
+              "minimum": 1,
+              "description": "When present, semantic example validation requires equality with top-level number."
             },
             "head": {
               "type": "object",
@@ -117,7 +120,7 @@
       }
     },
     {
-      "title": "push",
+      "title": "push raw body",
       "type": "object",
       "additionalProperties": true,
       "required": [
@@ -169,7 +172,7 @@
       }
     },
     {
-      "title": "installation_or_installation_repositories",
+      "title": "installation lifecycle raw body",
       "type": "object",
       "additionalProperties": true,
       "required": [
@@ -178,7 +181,8 @@
       ],
       "properties": {
         "action": {
-          "type": "string"
+          "type": "string",
+          "minLength": 1
         },
         "installation": {
           "type": "object",
@@ -201,10 +205,10 @@
               ],
               "properties": {
                 "login": {
-                  "type": "string"
+                  "type": "string",
+                  "minLength": 1
                 },
                 "type": {
-                  "type": "string",
                   "enum": [
                     "User",
                     "Organization"
@@ -219,6 +223,9 @@
           "items": {
             "type": "object",
             "additionalProperties": true,
+            "required": [
+              "full_name"
+            ],
             "properties": {
               "full_name": {
                 "type": "string",
@@ -232,6 +239,9 @@
           "items": {
             "type": "object",
             "additionalProperties": true,
+            "required": [
+              "full_name"
+            ],
             "properties": {
               "full_name": {
                 "type": "string",

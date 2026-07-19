@@ -1,0 +1,8 @@
+{
+  "name": "Veripsa",
+  "title": "Veripsa — Paused (acknowledge to proceed)",
+  "token": "Paused (acknowledge to proceed)",
+  "conclusion": "neutral",
+  "underlyingVerdict": "wait_in_line",
+  "acknowledged": false
+}

@@ -1,0 +1,212 @@
+{
+  "contractVersion": "1.0.0",
+  "checkName": "Veripsa",
+  "titleField": "check_run.output.title",
+  "states": [
+    {
+      "token": "Clear",
+      "kind": "verdict",
+      "titlePattern": "^Veripsa — Clear(?: — .+)?$",
+      "titleExample": "Veripsa — Clear",
+      "conclusion": "success",
+      "underlyingVerdicts": [
+        "clear"
+      ],
+      "acknowledged": "forbidden",
+      "commentAvailability": "never",
+      "stability": "stable"
+    },
+    {
+      "token": "Clear to land",
+      "kind": "verdict",
+      "titlePattern": "^Veripsa — Clear to land(?: — .+)?$",
+      "titleExample": "Veripsa — Clear to land",
+      "conclusion": "success",
+      "underlyingVerdicts": [
+        "clear"
+      ],
+      "acknowledged": "forbidden",
+      "commentAvailability": "required",
+      "stability": "stable"
+    },
+    {
+      "token": "Heads up",
+      "kind": "verdict",
+      "titlePattern": "^Veripsa — Heads up(?: — .+)?$",
+      "titleExample": "Veripsa — Heads up",
+      "conclusion": "neutral",
+      "underlyingVerdicts": [
+        "heads_up"
+      ],
+      "acknowledged": "forbidden",
+      "commentAvailability": "when_coordination_context_exists",
+      "stability": "stable"
+    },
+    {
+      "token": "Wait in line",
+      "kind": "verdict",
+      "titlePattern": "^Veripsa — Wait in line(?: — .+)?$",
+      "titleExample": "Veripsa — Wait in line",
+      "conclusion": "neutral",
+      "underlyingVerdicts": [
+        "wait_in_line"
+      ],
+      "acknowledged": "forbidden",
+      "commentAvailability": "when_coordination_context_exists",
+      "stability": "stable"
+    },
+    {
+      "token": "Unknown",
+      "kind": "verdict",
+      "titlePattern": "^Veripsa — Unknown(?: — .+)?$",
+      "titleExample": "Veripsa — Unknown",
+      "conclusion": "neutral",
+      "underlyingVerdicts": [
+        "unknown"
+      ],
+      "acknowledged": "forbidden",
+      "commentAvailability": "required",
+      "stability": "stable"
+    },
+    {
+      "token": "Paused (acknowledge to proceed)",
+      "kind": "pause",
+      "titlePattern": "^Veripsa — Paused \\(acknowledge to proceed\\)(?: — .+)?$",
+      "titleExample": "Veripsa — Paused (acknowledge to proceed)",
+      "conclusion": "action_required",
+      "underlyingVerdicts": [
+        "heads_up",
+        "wait_in_line"
+      ],
+      "acknowledged": "false",
+      "commentAvailability": "required",
+      "stability": "stable"
+    },
+    {
+      "token": "Acknowledged",
+      "kind": "pause",
+      "titlePattern": "^Veripsa — Acknowledged(?: — .+)?$",
+      "titleExample": "Veripsa — Acknowledged",
+      "conclusion": "neutral",
+      "underlyingVerdicts": [
+        "heads_up",
+        "wait_in_line"
+      ],
+      "acknowledged": "true",
+      "commentAvailability": "required",
+      "stability": "stable"
+    },
+    {
+      "token": "Unresolved merge conflict markers",
+      "kind": "high_salience",
+      "titlePattern": "^Veripsa — Unresolved merge conflict markers$",
+      "titleExample": "Veripsa — Unresolved merge conflict markers",
+      "conclusion": "action_required",
+      "underlyingVerdicts": [
+        "merge_conflict_markers"
+      ],
+      "acknowledged": "forbidden",
+      "commentAvailability": "required",
+      "stability": "stable"
+    },
+    {
+      "token": "Acknowledgement verification pending",
+      "kind": "operational",
+      "titlePattern": "^Veripsa — acknowledgement verification pending$",
+      "titleExample": "Veripsa — acknowledgement verification pending",
+      "conclusion": "neutral",
+      "underlyingVerdicts": [],
+      "acknowledged": "forbidden",
+      "commentAvailability": "never",
+      "stability": "stable"
+    },
+    {
+      "token": "Heading to",
+      "kind": "operational",
+      "titlePattern": "^Veripsa — heading to .+$",
+      "titleExample": "Veripsa — heading to main",
+      "conclusion": "success",
+      "underlyingVerdicts": [],
+      "acknowledged": "forbidden",
+      "commentAvailability": "never",
+      "stability": "stable"
+    },
+    {
+      "token": "Watching",
+      "kind": "operational",
+      "titlePattern": "^Veripsa is now watching$",
+      "titleExample": "Veripsa is now watching",
+      "conclusion": "neutral",
+      "underlyingVerdicts": [],
+      "acknowledged": "forbidden",
+      "commentAvailability": "never",
+      "stability": "stable"
+    },
+    {
+      "token": "Early-access limit reached",
+      "kind": "operational",
+      "titlePattern": "^Veripsa paused — early-access limit reached$",
+      "titleExample": "Veripsa paused — early-access limit reached",
+      "conclusion": "neutral",
+      "underlyingVerdicts": [],
+      "acknowledged": "forbidden",
+      "commentAvailability": "never",
+      "stability": "stable"
+    },
+    {
+      "token": "Changed files not read",
+      "kind": "operational",
+      "titlePattern": "^Veripsa — changed files not read, not analyzed$",
+      "titleExample": "Veripsa — changed files not read, not analyzed",
+      "conclusion": "neutral",
+      "underlyingVerdicts": [],
+      "acknowledged": "forbidden",
+      "commentAvailability": "never",
+      "stability": "stable"
+    },
+    {
+      "token": "Branch state not verified",
+      "kind": "operational",
+      "titlePattern": "^Veripsa — branch state not verified, retrying$",
+      "titleExample": "Veripsa — branch state not verified, retrying",
+      "conclusion": "neutral",
+      "underlyingVerdicts": [],
+      "acknowledged": "forbidden",
+      "commentAvailability": "never",
+      "stability": "stable"
+    },
+    {
+      "token": "Merge queue: clear",
+      "kind": "merge_queue",
+      "titlePattern": "^Veripsa — merge queue: clear$",
+      "titleExample": "Veripsa — merge queue: clear",
+      "conclusion": "success",
+      "underlyingVerdicts": [],
+      "acknowledged": "forbidden",
+      "commentAvailability": "never",
+      "stability": "stable"
+    },
+    {
+      "token": "Merge queue: review overlap",
+      "kind": "merge_queue",
+      "titlePattern": "^Veripsa — merge queue: review overlap$",
+      "titleExample": "Veripsa — merge queue: review overlap",
+      "conclusion": "neutral",
+      "underlyingVerdicts": [],
+      "acknowledged": "forbidden",
+      "commentAvailability": "never",
+      "stability": "stable"
+    },
+    {
+      "token": "Merge queue: not analyzed",
+      "kind": "merge_queue",
+      "titlePattern": "^Veripsa — merge queue: not analyzed$",
+      "titleExample": "Veripsa — merge queue: not analyzed",
+      "conclusion": "neutral",
+      "underlyingVerdicts": [],
+      "acknowledged": "forbidden",
+      "commentAvailability": "never",
+      "stability": "stable"
+    }
+  ]
+}

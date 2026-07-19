@@ -1,0 +1,7 @@
+{
+  "event": "check_run",
+  "action": "completed",
+  "installationId": 12345678,
+  "repositoryFullName": "example/repo",
+  "headSha": "0123456789abcdef0123456789abcdef01234567"
+}

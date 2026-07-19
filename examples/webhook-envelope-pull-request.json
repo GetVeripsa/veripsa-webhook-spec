@@ -1,0 +1,10 @@
+{
+  "event": "pull_request",
+  "action": "opened",
+  "installationId": 12345678,
+  "repositoryFullName": "example/repo",
+  "prNumber": 42,
+  "headSha": "0123456789abcdef0123456789abcdef01234567",
+  "baseRef": "main",
+  "branchRef": "agent/pricing-a"
+}

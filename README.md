@@ -1,153 +1,68 @@
 # veripsa-webhook-spec
 
-The public integration contract for **Veripsa Core** — the advisory,
-content-free GitHub App for pre-merge PR traffic control between open pull
-requests.
+The versioned public integration contract for **Veripsa Core** — the advisory, content-free GitHub App for pre-merge PR traffic control between open pull requests. It documents only what an integrator can observe: subscribed event families, requested permissions, normalized checks and comments, `veripsa-ack`, and the content-free data boundary.
 
-This repository is the open-source surface that external tools can build against. It defines:
+> This repository does not publish Veripsa Core internals, scoring, ranking, or collision heuristics.
 
-- which **GitHub webhook events** the App subscribes to,
-- the shape of **what it posts back** — check runs and optional managed PR
-  comments,
-- the semantics of the **`veripsa-ack`** label,
-- machine-readable **JSON Schemas**, TypeScript declarations, and examples
-  for agents, dashboards, log shippers, and security reviewers.
+## Stable field boundary
 
-Veripsa lives at [veripsa.com](https://veripsa.com). The App itself is
-installed from a free on-ramp; this repo is published separately so
-integrators can treat the public output surface as a stable contract.
+- `check_run.name` is exactly `Veripsa`.
+- `check_run.output.title` is the human-facing title. Normal verdict titles begin with `Veripsa — `, but integrations should normalize them to the stable token in [`CHECK_STATES.md`](./CHECK_STATES.md), not full-string-match evolving sentence copy.
+- An unknown future title is unsupported: preserve and display the full title and GitHub `conclusion`; do not guess a known verdict.
 
-> This is the **integration contract**. It is **not** documentation of how
-> Veripsa decides anything internally.
+## Start here
 
-## Best links for readers
-
-| Need | Link |
+| Need | Source |
 | --- | --- |
-| Product overview | <https://veripsa.com/how-it-works> |
 | Collision walkthrough | <https://veripsa.com/collision> |
+| Observable truth matrix | [`TRUTH_MATRIX.md`](./TRUTH_MATRIX.md) |
+| Check/token/conclusion contract | [`CHECK_STATES.md`](./CHECK_STATES.md) |
+| Output and comment normalization | [`OUTPUT.md`](./OUTPUT.md) |
+| Event families and fields | [`WEBHOOK_EVENTS.md`](./WEBHOOK_EVENTS.md) |
+| Permissions and raw webhook notes | [`EVENTS.md`](./EVENTS.md) |
+| ACK label semantics | [`ACK_LABEL.md`](./ACK_LABEL.md) |
 | Data handling and retention | [`DATA_HANDLING.md`](./DATA_HANDLING.md) |
-| Agent usage guide | <https://veripsa.com/docs/with-agents> |
-| Recent improvements | <https://veripsa.com/whats-new> |
+| Compatibility and migration | [`COMPATIBILITY.md`](./COMPATIBILITY.md) |
 
-## Who this is for
-
-- Developers building tooling on top of Veripsa output (dashboards, agent
-  rules, log shippers).
-- AI-agent maintainers who want their agent to **read Veripsa's check /
-  comment / label** and react to it correctly.
-- Security and compliance reviewers who want to know exactly which GitHub
-  permissions and events the App uses.
-
-## Contract boundary
-
-- It is **not** a description of Veripsa's internal engine, which
-  stays private.
-- It is **not** an API to call into Veripsa. The App is event-driven over
-  GitHub webhooks; there is no public REST surface for integrators today.
-- It is **not** an SLA. Veripsa is **advisory by default**; branch protection
-  or rulesets decide whether an `action_required` check conclusion holds a
-  merge.
-
-## Current integration scope
-
-- Veripsa is **content-free by design**: it does not store or display customer
-  source file bodies or diff contents. This repo documents the public output
-  contract, not a code-review surface.
-- Veripsa coordinates work **within one installed repository** today.
-  Cross-repository coordination is not a claim made by this spec.
-- Veripsa works alongside merge queues, AI reviewers, CI, tests, and human
-  review. It adds the earlier open-PR collision and landing-order signal before
-  `main` changes.
-- The four base traffic signals are **Clear**, **Heads up**, **Wait in line**,
-  and **Unknown**. A material coupling may add **Paused (acknowledge to
-  proceed)** as a control overlay; Paused is not a fifth traffic verdict.
-
-## Repository map
-
-- [`DATA_HANDLING.md`](./DATA_HANDLING.md) — what GitHub data can reach the
-  service, what content-free metadata may be retained, and how retention,
-  uninstall, and account erasure differ.
-- [`EVENTS.md`](./EVENTS.md) — the GitHub webhook events Veripsa
-  subscribes to, the GitHub permissions it requests, the events it
-  explicitly does **not** subscribe to, and a high-level note on
-  language coverage.
-- [`OUTPUT.md`](./OUTPUT.md) — the four base traffic signals, material-coupling
-  Paused/Acknowledged controls, GitHub `conclusion` mapping, PR-comment marker
-  convention, and idempotent-upsert contract.
-- [`ACK_LABEL.md`](./ACK_LABEL.md) — the `veripsa-ack` label: what adding
-  it means, what removing it means, who can add it, and the stale-ack rule.
-- [`schemas/`](./schemas/) — JSON Schemas for the public contract surfaces.
-- [`types/index.d.ts`](./types/index.d.ts) — TypeScript declarations for
-  integrators that want to branch on Veripsa's stable tokens.
-- [`examples/`](./examples/) — copy-pasteable payload and comment examples.
-
-## Consuming the spec
-
-The Markdown files are the human-readable source of truth. The schema and
-type files mirror the same public surface for tool authors.
-
-The check-run and coordination-comment assets are normalized views documented
-in [`OUTPUT.md`](./OUTPUT.md). The webhook-routing schema instead validates the
-abridged raw GitHub bodies shown in [`EVENTS.md`](./EVENTS.md); the TypeScript
-routing interface is a flattened normalized view.
-
-This repository includes `package.json` metadata so the assets can be
-consumed as a package or published to a registry without changing paths.
-Until a registry release exists, use GitHub paths directly or vendor the
-specific schema files you need.
-
-Stable entry points:
+## Machine-readable entry points
 
 ```text
+contract/check-states.json
+contract/webhook-events.json
 schemas/check-run-signal.schema.json
 schemas/pr-comment-surface.schema.json
-schemas/webhook-routing-event.schema.json
+schemas/webhook-routing-envelope.schema.json
+schemas/webhook-routing-event.schema.json      # legacy selected raw bodies
 schemas/ack-label.schema.json
 types/index.d.ts
 ```
 
-## Compatibility policy
+The two files under `contract/` are the canonical machine sources. Generated Schema, declaration, and Markdown files are checked for drift in CI.
 
-Integrators may rely on:
+## Version and consumption
 
-- the literal check-run name prefix `Veripsa — `,
-- the verdict / state tokens listed in [`OUTPUT.md`](./OUTPUT.md),
-- the PR comment marker shape `<!-- veripsa:PR-<number> -->`,
-- the ack-snapshot marker prefix `<!-- veripsa-ack-snap:`,
-- the exact label name `veripsa-ack`,
-- the JSON Schema file paths in `schemas/`.
+Current public contract: **v1.0.0**. The contract version is independent from product deploy versions.
 
-Integrators should not rely on full human-facing sentence copy, comment
-paragraph order, badge text, or private scoring details.
+No registry release is promised. Until one exists, vendor assets from an immutable Git tag or commit. Mutable `main` URLs are suitable for reading, not for pinning a production integration. See [`CHANGELOG.md`](./CHANGELOG.md) and [`COMPATIBILITY.md`](./COMPATIBILITY.md).
 
-When the App's behaviour visibly changes, it is announced on
-[veripsa.com/whats-new](https://veripsa.com/whats-new).
+## Product boundary
 
-## Contributing
+Veripsa is advisory by default, content-free by design, and coordinates work within one installed repository today. It works alongside merge queues, AI reviewers, CI, tests, branch protection, and human review; it is not a replacement for those systems or a correctness checker.
 
-Contributions are welcome when they improve the public contract:
+- Product docs: <https://veripsa.com/docs>
+- Support: <https://veripsa.com/support>
+- Security: <https://veripsa.com/security/disclosure>
 
-- schema corrections,
-- ambiguous spec wording,
-- missing examples,
-- agent-integration notes,
-- issue templates and documentation fixes.
+## Local verification
 
-Please do **not** include private source code, customer code excerpts, diffs,
-or proprietary repository details. Veripsa Core engine internals remain
-closed-source; this repo accepts contributions to the public integration
-surface only. See [`CONTRIBUTING.md`](./CONTRIBUTING.md).
+```sh
+npm ci
+npm run check
+npm pack --dry-run
+```
 
-## Reporting an issue with the spec
-
-If the spec on this repo and the App's actual behaviour diverge, please
-[open an issue](./.github/ISSUE_TEMPLATE/). The App's actual behaviour
-wins, and the spec gets corrected.
+`check:types` requires TypeScript 5.x on `PATH`; CI installs it explicitly. Schema validation uses Python `jsonschema` with draft 2020-12 support.
 
 ## License
 
-The contents of this spec repo are licensed under the
-[MIT License](./LICENSE). The Veripsa Core engine itself is **not**
-open-source and is **not** distributed under this license — only the
-public integration contract files in this repository are.
+The public contract files are MIT-licensed. Veripsa Core is not distributed by this repository and is not covered by this license.

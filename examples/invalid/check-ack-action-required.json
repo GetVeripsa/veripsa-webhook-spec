@@ -1,0 +1,8 @@
+{
+  "name": "Veripsa",
+  "title": "Veripsa — Acknowledged",
+  "token": "Acknowledged",
+  "conclusion": "action_required",
+  "underlyingVerdict": "heads_up",
+  "acknowledged": true
+}
